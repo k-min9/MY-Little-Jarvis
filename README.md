@@ -13,4 +13,38 @@
 
 ``` bash
 py -3.9 -m venv venv
+
+# 일반 library
+pip install pyinstaller
+pip install googletrans==3.1.0a0
+pip install tkinterdnd2 # tkinter 보조로 drag and drop 등의 외부 입력 받음
+pip install pyaudio
+pip install keyboard
+pip install pygame
+pip install Unidecode
+
+# websearch 관련
+pip install beautifulsoup4
+pip install optimum
+pip install duckduckgo_search==6.1.0
+pip install lxml
+pip install faiss-cpu==1.8.0
+pip install rank_bm25==0.2.2
+
+# AI 관련 library
+## 기본
+pip install langchain
+pip install langchain-community
+pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
+## 음성인식
+pip install faster-whisper
+pip install SpeechRecognition  # init에 faster-whisper을 위한 함수 개조 있음
+## 음성합성(VITS)
+pip install jamo g2pk2 
+pip install ko-pron
+pip install Cython
+# pip install pyopenjtalk==0.2.0 # 일본어음성합성시 필요
+
+## 화상인식
+pip install einops timm  # florence
 ```
