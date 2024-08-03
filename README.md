@@ -36,6 +36,7 @@ pip install rank_bm25==0.2.2
 pip install langchain
 pip install langchain-community
 pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
+pip install llama-cpp-python --prefer-binary --extra-index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/AVX2/cu116
 ## 음성인식
 pip install faster-whisper
 pip install SpeechRecognition  # init에 faster-whisper을 위한 함수 개조 있음
@@ -43,8 +44,13 @@ pip install SpeechRecognition  # init에 faster-whisper을 위한 함수 개조 
 pip install jamo g2pk2 
 pip install ko-pron
 pip install Cython
+pip install scipy==1.12.0
+pip install librosa
 # pip install pyopenjtalk==0.2.0 # 일본어음성합성시 필요
 
 ## 화상인식
 pip install einops timm  # florence
 ```
+
+- 외부 파일
+  - kss_korean_ISTFT.pth
