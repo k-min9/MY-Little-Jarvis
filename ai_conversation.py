@@ -83,7 +83,7 @@ The conversation is only between {player} and {character}
 {system_prompt}<|eot_id|><|start_header_id|>user<|end_header_id|>
 {prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
 '''
-def get_LLAMA3_prompt(query):
+def get_LLAMA3_prompt(query, info_img=None):
     import prompt_main
     import memory
     from jinja2 import Template
@@ -105,6 +105,45 @@ def get_LLAMA3_prompt(query):
     
     return prompt
     
+def get_LLAMA_3_image_prompt(query, info_img):
+    import ai_florence 
+    import prompt_main
+    import memory
+    from jinja2 import Template
+
+    LLAMA3_TEMPLATE = "{% set loop_messages = messages %}{% for message in loop_messages %}{% set content = '<|start_header_id|>' + message['role'] + '<|end_header_id|>\n\n'+ message['content'] | trim + '<|eot_id|>' %}{% if loop.index0 == 0 %}{% set content = bos_token + content %}{% endif %}{{ content }}{% endfor %}{% if add_generation_prompt %}{{ '<|start_header_id|>assistant<|end_header_id|>\n\n' }}{% endif %}"
+    LLM_STOP_SEQUENCE = "<|eot_id|>"
+       
+    messages = list() 
+    
+    messages.append({"role": "system", "content" : """A chat between user and artificial intelligence assistant. The assistant is a cute girl who never confident about facts. The assistant has image info for answering chat. The assistant uses the available tools to retrieve relevant information and give helpful, detailed, and polite answers to the user's questions. The assistant simply answers the question succinctly and makes no reference to the source or rationale.
+
+Image info tool command format: Image_info
+```plaintext
+<|info|>
+```"""})
+    # messages.extend(prompt_main.get_message_list_main())  # 하더라도 prompt 바꾸는게 나을것 같음
+    # messages.extend(memory.get_memory_message_list(4096))
+    messages.append({"role": "user", "content": query})
+    image_info = ai_florence.get_image_info(info_img)
+    # messages.append({"role": "assistant", "content": 'Image_info("<'+image_info+'>")'})
+      
+    template = Template(LLAMA3_TEMPLATE)
+    prompt = template.render(
+                    messages=messages,
+                    bos_token="<|begin_of_text|>",
+                    add_generation_prompt=False,  # <|im_start|>assistant를 마지막에 붙이는거
+    )
+    prompt = prompt + """<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+    
+Image_info
+```plaintext\n"""+ image_info + """\n```<|eot_id|><|start_header_id|>assistant<|end_header_id|>"""
+    
+    print('###prompt', prompt)
+    print('###prompt end')
+    
+    return prompt
+
 #### 대답 Stream 계열
 class LlamaCppModel:
     def __init__(self):
@@ -263,13 +302,13 @@ class Iteratorize:
         self.stop_now = True
         # clear_torch_cache()
     
-def process_stream(query, player, character, is_sentence, is_regenerate, info_rag=None, info_memory=None, info_web=None):
+def process_stream(query, player, character, is_sentence, is_regenerate, info_rag=None, info_memory=None, info_web=None, info_img=None):
     global llm
     if not llm:
         load_model()
     
     if is_sentence:
-        for j, reply_list in enumerate(generate_reply(query, player, character, is_sentence, is_regenerate, info_rag=info_rag, info_memory=info_memory, info_web=info_web)):
+        for j, reply_list in enumerate(generate_reply(query, player, character, is_sentence, is_regenerate, info_rag=info_rag, info_memory=info_memory, info_web=info_web, info_img=info_img)):
             visible_reply_list = list()
             for reply in reply_list:
                 visible_reply = reply
@@ -284,7 +323,7 @@ def process_stream(query, player, character, is_sentence, is_regenerate, info_ra
     else:
         visible_reply = ''
         reply = None
-        for j, reply in enumerate(generate_reply(query, player, character, is_sentence, is_regenerate, info_rag=info_rag, info_memory=info_memory, info_web=info_web)):
+        for j, reply in enumerate(generate_reply(query, player, character, is_sentence, is_regenerate, info_rag=info_rag, info_memory=info_memory, info_web=info_web, info_img=info_img)):
             # print('reply2', reply)
             visible_reply = reply
             visible_reply = re.sub("(<USER>|<user>|{{user}})", 'You', reply)
@@ -331,10 +370,14 @@ def apply_stopping_strings(reply, all_stop_strings = ['\nYou:', '<|im_end|>\n<|i
 
     return reply, stop_found
     
-def _generate_reply(query, player, character, is_sentence, is_regenerate, info_rag=None, info_memory=None, info_web=None, temperature=0.2):    
+def _generate_reply(query, player, character, is_sentence, is_regenerate, info_rag=None, info_memory=None, info_web=None, info_img=None, temperature=0.2):    
     # print('is_sentence', is_sentence)
-    global llm    
-    prompt = get_LLAMA3_prompt(query)  # rag, web, memory(long) 미적용
+    global llm
+    prompt = ''
+    if info_img:
+        prompt = get_LLAMA_3_image_prompt(query, info_img)
+    else:      
+        prompt = get_LLAMA3_prompt(query)  # rag, web, memory(long) 미적용
 
     all_stop_strings = ['\nYou:', '<|im_end|>', '<|im_start|>user', '<|im_start|>assistant\n', '\nAI:', "<|eot_id|>"]
     if is_sentence:
@@ -465,3 +508,15 @@ if __name__ == "__main__":
         if last_reply_len < len(reply_list):
             last_reply_len = len(reply_list)
             print('reply_list', reply_list)
+    
+    # Stream 테스트 (이미지)
+    # question = "what can you see?"
+    # question = "Can you explain what you are watching?"
+    # question = "what is the name of this?"
+    # result = ''
+    # last_reply_len = 0
+    # for j, reply_list in enumerate(process_stream(question, 'm9dev', 'arona', True, False, info_img='./image/apple.png')):
+    #     if last_reply_len < len(reply_list):
+    #         last_reply_len = len(reply_list)
+    #         print('reply_list1', reply_list)
+            
