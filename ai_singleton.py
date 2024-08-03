@@ -206,3 +206,79 @@ def release():
     llm = LlamaCppModel()
     if llm.initialized:
         llm.release()
+
+################################################################ Vision
+import os
+from PIL import Image
+from transformers import AutoProcessor, AutoModelForCausalLM 
+
+from unittest.mock import patch
+from transformers.dynamic_module_utils import get_imports
+
+# VisionModel 싱글톤 클래스
+class VisionModel(metaclass=SingletonMeta):
+    def __init__(self):
+        self.model = None
+        self.initialized = False
+
+    def __del__(self):
+        del self.model
+
+    def from_pretrained(self, model_name):
+        with patch("transformers.dynamic_module_utils.get_imports", self.fixed_get_imports):  # Workaround for unnecessary flash_attn requirement
+            self.model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True, cache_dir='./model/', local_files_only=True)
+        self.initialized = True
+
+    @staticmethod
+    def fixed_get_imports(filename):
+        if not str(filename).endswith("modeling_florence2.py"):
+            return get_imports(filename)
+        imports = get_imports(filename)
+        imports.remove("flash_attn")
+        return imports
+
+    def release(self):
+        self.model = None
+        self.initialized = False
+
+# VisionProcessor 싱글톤 클래스
+class VisionProcessor(metaclass=SingletonMeta):
+    def __init__(self):
+        self.processor = None
+        self.initialized = False
+
+    def __del__(self):
+        del self.processor
+
+    def from_pretrained(self, processor_name):
+        self.processor = AutoProcessor.from_pretrained(processor_name, trust_remote_code=True, cache_dir='./model/', local_files_only=True)
+        self.initialized = True
+
+    def release(self):
+        self.processor = None
+        self.initialized = False
+
+# getter 함수
+def get_vision_model():
+    vision_model = VisionModel()
+    if not vision_model.initialized:
+        vision_model.from_pretrained("microsoft/Florence-2-base")
+    return vision_model
+
+def get_vision_processor():
+    vision_processor = VisionProcessor()
+    if not vision_processor.initialized:
+        vision_processor.from_pretrained("microsoft/Florence-2-base")
+    return vision_processor
+
+# 리소스 해제 함수
+def release_vision_resources():
+    vision_model = VisionModel()
+    if vision_model.initialized:
+        vision_model.release()
+        VisionModel.release_instance()
+
+    vision_processor = VisionProcessor()
+    if vision_processor.initialized:
+        vision_processor.release()
+        VisionProcessor.release_instance()
