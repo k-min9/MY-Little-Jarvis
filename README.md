@@ -25,6 +25,7 @@ pip install Unidecode
 pip install Flask
 
 # websearch 관련
+pip install sentence-transformers
 pip install beautifulsoup4
 pip install optimum
 pip install duckduckgo_search==6.1.0
