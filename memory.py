@@ -152,5 +152,5 @@ if __name__ == "__main__":
     # print(get_text_prompt())
     
     # print(get_chatLM_prompt())
-    print(prompt_main.get_message_list_pingpong_v34())
+    print(prompt_main.get_message_list_main())
     print(get_memory_message_list(4096))
