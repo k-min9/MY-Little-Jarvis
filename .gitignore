@@ -5,7 +5,12 @@
 */build
 /model
 /image
+/submodules
+/config
+/memory
+/dist
 
 *.pth
 *.gguf
 *.onnx
+*.spec
