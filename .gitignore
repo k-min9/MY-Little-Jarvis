@@ -9,8 +9,10 @@
 /config
 /memory
 /dist
+/build
 
 *.pth
 *.gguf
 *.onnx
 *.spec
+*.log
