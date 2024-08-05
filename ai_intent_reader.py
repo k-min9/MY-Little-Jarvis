@@ -1,11 +1,6 @@
-import re
 from threading import Lock
-import random
 
 from ai_singleton import check_llm, get_llm
-from ai_topics import topics
-
-import state
 
 llm = None
 
