@@ -50,16 +50,16 @@ def get_text_cleaned(text, hps):
     text_norm = torch.LongTensor(text_norm)
     return text_norm
 
-def get_audio(actor, text, sid, type='single', use_cuda=False):
+def get_audio(actor, text, sid, type='single', use_cuda=False, length_scale=0.9):
     stn_tst = get_text(text, hps)
     if use_cuda:
         with torch.no_grad():
             x_tst = stn_tst.cuda().unsqueeze(0)
             x_tst_lengths = torch.LongTensor([stn_tst.size(0)]).cuda()
             if type=='multi':
-                audio = infer_g[actor].infer(x_tst, x_tst_lengths, sid=torch.LongTensor([sid]).cuda(), noise_scale=0.667, noise_scale_w=0.8, length_scale=1)[0][0,0].data.cpu().float().numpy()
+                audio = infer_g[actor].infer(x_tst, x_tst_lengths, sid=torch.LongTensor([sid]).cuda(), noise_scale=0.667, noise_scale_w=0.8, length_scale=length_scale)[0][0,0].data.cpu().float().numpy()
             else:
-                audio = infer_g[actor].infer(x_tst, x_tst_lengths, noise_scale=0.667, noise_scale_w=0.8, length_scale=1)[0][0,0].data.cpu().float().numpy()
+                audio = infer_g[actor].infer(x_tst, x_tst_lengths, noise_scale=0.667, noise_scale_w=0.8, length_scale=length_scale)[0][0,0].data.cpu().float().numpy()
     else:
         with torch.no_grad():
             # x_tst = stn_tst.cuda().unsqueeze(0)
@@ -67,9 +67,9 @@ def get_audio(actor, text, sid, type='single', use_cuda=False):
             x_tst = stn_tst.unsqueeze(0)
             x_tst_lengths = torch.LongTensor([stn_tst.size(0)])
             if type=='multi':
-                audio = infer_g[actor].infer(x_tst, x_tst_lengths, sid=torch.LongTensor([sid]), noise_scale=0.667, noise_scale_w=0.8, length_scale=1)[0][0,0].data.cpu().float().numpy()
+                audio = infer_g[actor].infer(x_tst, x_tst_lengths, sid=torch.LongTensor([sid]), noise_scale=0.667, noise_scale_w=0.8, length_scale=length_scale)[0][0,0].data.cpu().float().numpy()
             else:
-                audio = infer_g[actor].infer(x_tst, x_tst_lengths, noise_scale=0.667, noise_scale_w=0.8, length_scale=1)[0][0,0].data.cpu().float().numpy()
+                audio = infer_g[actor].infer(x_tst, x_tst_lengths, noise_scale=0.667, noise_scale_w=0.8, length_scale=length_scale)[0][0,0].data.cpu().float().numpy()
     return audio
 
 # cuda 되나 그냥 로딩해보기
