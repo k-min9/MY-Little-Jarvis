@@ -48,6 +48,7 @@ import ai_singleton
 
 from util_screenshot import ScreenshotApp
 import googletrans # 번역 관련
+from proper_nouns import change_to_jp, change_to_ko  # 고유명사 번역
 
 is_program_ended = False
 is_use_cuda = False
@@ -68,7 +69,7 @@ query_ai_translation_ko = ''
 query_ai_translation_en = ''
 latest_ai_module = ''  # regenerate 용
 
-translator_Google = googletrans.Translator()
+translator_google = googletrans.Translator()
 response_ai_translation_jp = ''
 response_ai_translation_ko = ''
 
@@ -895,7 +896,7 @@ class ChatBalloon(tk.Toplevel):
             chat_window = None
             self.destroy()
             
-            trans_question = translator_Google.translate(text, dest='en').text    
+            trans_question = translator_google.translate(text, dest='en').text    
             conversation_web(trans_question)
         else:
             return
@@ -1229,8 +1230,10 @@ class AnswerBalloonSimple(tk.Toplevel):
         self.canvas.bind("<B1-Motion>", self.on_drag)
         self.canvas.bind("<Double-Button-1>", self.on_double_click)
 
-        result_ko = translator_Google.translate(text, dest='ko').text        
-        result_jp = translator_Google.translate(text, dest='ja').text
+        result_ko = translator_google.translate(text, dest='ko').text        
+        result_ko = change_to_ko(result_ko)
+        result_jp = translator_google.translate(text, dest='ja').text
+        result_jp = change_to_jp(result_jp)
         audio = os.path.abspath('.').replace('\\','/') +'/' + synthesize_char('korean', result_ko, use_cuda=is_use_cuda, type='single', sid=0)
         sound_length = play_wav(audio, loaded_settings['setting_volume'])
         self.after(int(sound_length*1000)+800, self.kill_balloon)
@@ -1304,7 +1307,7 @@ class AskBalloon(tk.Toplevel):
         self.btns = list()
         buttons = [
             # ("수정", img_modify, None, False),  # $$$ 후순위
-            ("보내기", send_img, self.send, True)
+            ("승인", check_img, self.send, True)
         ]
         x_offset = self.canvas_width - (25 * len(buttons)) - 3  # 버튼들을 오른쪽 하단에 정렬하기 위해 x 위치 계산
         y_offset = self.canvas_height - 30  # 버튼들의 y 위치
@@ -1358,7 +1361,8 @@ class AskBalloon(tk.Toplevel):
         self.reloc_btns()
 
     def kill_balloon(self):
-        global ask_balloon
+        global ask_balloon, is_chatting
+        is_chatting= False
         ask_balloon = None
         self.photo = None
         self.destroy()  
@@ -1383,6 +1387,8 @@ class AskBalloon(tk.Toplevel):
         # show_status_balloon()
         self.kill_balloon()
             
+        global is_chatting
+        is_chatting=True
         conversation_web(self.trans_question)
         
 # 질문 상자
@@ -2498,7 +2504,7 @@ def load_settings():
                 settings['setting_load_option_customlist'] = ['conversation']                    
             # Setting 원본         
             if 'setting_language' not in settings or settings['setting_language'] not in ["日本語", "English", "한국어"]:
-                settings['setting_language'] = init_lang if init_lang else "日本語"
+                settings['setting_language'] = init_lang if init_lang else "한국어"
                 print('load_settings: setting_language error')
             if 'setting_name' not in settings:
                 settings['setting_name'] = 'Sensei'
@@ -2520,7 +2526,7 @@ def load_settings():
                 settings['setting_chat_key'] = ''
                 print('load_settings: setting_chat_key error')
             if 'setting_chat_language' not in settings or settings['setting_chat_language'] not in ["日本語", "English", "한국어"]:
-                settings['setting_chat_language'] = init_lang if init_lang else "日本語"
+                settings['setting_chat_language'] = init_lang if init_lang else "한국어"
                 print('load_settings: setting_chat_language error')
             if 'setting_chat_click_sensitivity' not in settings:
                 settings['setting_chat_click_sensitivity'] = 100
@@ -2559,7 +2565,7 @@ def load_settings():
                 settings['setting_talk_key'] = ''
                 print('load_settings: setting_talk_key error')
             if 'setting_talk_language' not in settings or settings['setting_talk_language'] not in ["日本語", "English", "한국어"]:
-                settings['setting_talk_language'] = init_lang if init_lang else "日本語"
+                settings['setting_talk_language'] = init_lang if init_lang else "한국어"
                 print('load_settings: setting_talk_language error')
             if 'setting_talk_quality' not in settings or settings['setting_talk_quality'] not in ["tiny", "base", "small", "medium"]:
                 settings['setting_talk_quality'] = 'base'
@@ -2572,7 +2578,7 @@ def load_settings():
                 print('load_settings: setting_history_folder error')
             # Eden쪽 세팅
             if 'setting_language' not in settings or settings['setting_language'] not in ["日本語", "English", "한국어"]:
-                settings['setting_language'] = init_lang if init_lang else "日本語"
+                settings['setting_language'] = init_lang if init_lang else "한국어"
                 print('load_settings: setting_language error')
             if 'setting_preload_voice' not in settings:
                 settings['setting_preload_voice'] = False
@@ -2672,7 +2678,7 @@ def open_settings(e=None):
     settings_window = tk.Toplevel(root, padx=5, pady=5)
     settings_window.title("Settings")
     # settings_window.geometry("560x535")  # 풀 옵션
-    settings_window.geometry("540x520")
+    settings_window.geometry("510x300")
     
     global settings_keyboard_hooks
     settings_keyboard_hooks = list()  # 세팅 중 키보드 이벤트들
@@ -2727,13 +2733,13 @@ def open_settings(e=None):
         save_settings()
         # 언어에 맞춰 세팅 초기화
         name_label.config(text=get_message("Name"))
-        talk_quality_download_btn.config(text=get_message("Download"))
-        talk_quality_test_btn.config(text=get_message("Test"))
+        # talk_quality_download_btn.config(text=get_message("Download"))
+        # talk_quality_test_btn.config(text=get_message("Test"))
         # chat_click_sensitivity_label.config(text=get_message("Click Reaction"))
         # update_setting_translator() # translator_btn_input_key
 
     language_var = tk.StringVar(value=loaded_settings['setting_language'])
-    for column_idx, lang in enumerate(["日本語", "English", "한국어"]):
+    for column_idx, lang in enumerate(["한국어", "English", "日本語"]):
         lang_frame = tk.Frame(frame_language_desc)
         lang_frame.grid(row=0, column=column_idx, sticky="we", padx=20)
         lang_radio = tk.Radiobutton(lang_frame, text=lang, variable=language_var, value=lang, command=update_language)
@@ -2825,20 +2831,20 @@ def open_settings(e=None):
         save_settings()
         if chat_mode_var.get() == "OFF":
             chat_key_entry.config(state=tk.DISABLED)
-            talk_key_entry.config(state=tk.DISABLED)
+            # talk_key_entry.config(state=tk.DISABLED)
             for hook in settings_keyboard_hooks:
                 keyboard.unhook(hook)
             settings_keyboard_hooks = list()
 
         elif chat_mode_var.get() == "Click":
             chat_key_entry.config(state=tk.DISABLED)
-            talk_key_entry.config(state=tk.DISABLED)
+            # talk_key_entry.config(state=tk.DISABLED)
             for hook in settings_keyboard_hooks:
                 keyboard.unhook(hook)
             settings_keyboard_hooks = list()
         elif chat_mode_var.get() == "Key":
             chat_key_entry.config(state=tk.NORMAL)
-            talk_key_entry.config(state=tk.DISABLED)
+            # talk_key_entry.config(state=tk.DISABLED)
             chat_key_entry.focus_set()
             for hook in settings_keyboard_hooks:
                 keyboard.unhook(hook)
@@ -2901,7 +2907,7 @@ def open_settings(e=None):
         loaded_settings['setting_chat_language'] = chat_language_var.get()
         save_settings()
     chat_language_var = tk.StringVar(value=loaded_settings['setting_chat_language'])
-    for column_idx, chat_language in enumerate(["日本語", "English", "한국어"]):
+    for column_idx, chat_language in enumerate(["한국어", "English", "日本語"]):
         chat_language_frame = tk.Frame(frame_chat_desc_mode)
         chat_language_frame.grid(row=1, column=column_idx, sticky="we", padx=20)
         chat_language_radio = tk.Radiobutton(chat_language_frame, text=chat_language, variable=chat_language_var, value=chat_language, command=update_chat_language)
@@ -2919,210 +2925,210 @@ def open_settings(e=None):
     # chat_click_sensitivity_slider.bind("<ButtonRelease-1>", update_chat_click_sensitivity)  # 슬라이더에서 손 땠을때 이벤트 동작하게
 
     # Frame : Conversation > Talk > Label, desc
-    frame_talk = tk.Frame(frame_conversation)
-    frame_talk.grid(row=3, column=0, sticky="we", pady=2)
-    frame_talk_label = tk.Frame(frame_talk)
-    frame_talk_label.grid(row=0, column=0, sticky="we")
-    frame_talk_desc = tk.Frame(frame_talk)
-    frame_talk_desc.grid(row=0, column=1, sticky="we")
-    frame_talk_desc_quality = tk.Frame(frame_talk_desc)
-    frame_talk_desc_quality.grid(row=0, column=0, sticky="we")
-    frame_talk_desc_mode = tk.Frame(frame_talk_desc)
-    frame_talk_desc_mode.grid(row=1, column=0, sticky="we")
+    # frame_talk = tk.Frame(frame_conversation)
+    # frame_talk.grid(row=3, column=0, sticky="we", pady=2)
+    # frame_talk_label = tk.Frame(frame_talk)
+    # frame_talk_label.grid(row=0, column=0, sticky="we")
+    # frame_talk_desc = tk.Frame(frame_talk)
+    # frame_talk_desc.grid(row=0, column=1, sticky="we")
+    # frame_talk_desc_quality = tk.Frame(frame_talk_desc)
+    # frame_talk_desc_quality.grid(row=0, column=0, sticky="we")
+    # frame_talk_desc_mode = tk.Frame(frame_talk_desc)
+    # frame_talk_desc_mode.grid(row=1, column=0, sticky="we")
 
-    talk_label = tk.Label(frame_talk_label, text="Talk", anchor='w', width=8)
-    talk_label.grid(row=0, column=0, padx=5, pady=(0, 50), sticky="w")
+    # talk_label = tk.Label(frame_talk_label, text="Talk", anchor='w', width=8)
+    # talk_label.grid(row=0, column=0, padx=5, pady=(0, 50), sticky="w")
     
-    def update_setting_talk_quality(event):
-        loaded_settings['setting_talk_quality'] = talk_quality_dropdown.get()
-        save_settings()
-    def get_talk_quality_options():
-        talk_quality_options = list()
-        for sound_option in ['tiny', 'base', 'small', 'medium']:
-            os.makedirs('whisper', exist_ok=True)
-            path = './whisper/' + sound_option + '.pt'
-            if os.path.exists(path):
-                talk_quality_options.append(sound_option)    
-        return talk_quality_options
-    talk_quality_options = get_talk_quality_options()
-    if not talk_quality_options:
-        loaded_settings['setting_talk_quality'] = ""
-    if loaded_settings['setting_talk_quality'] not in talk_quality_options:
-        loaded_settings['setting_talk_quality'] = "base"
-    talk_quality_dropdown = ttk.Combobox(frame_talk_desc_quality, values=talk_quality_options, state="readonly", width=8)
-    talk_quality_dropdown.set(loaded_settings['setting_talk_quality'])
-    talk_quality_dropdown.grid(row=0, column=0, padx=(25,0), pady=(8,5), sticky="w")
-    talk_quality_dropdown.bind("<<ComboboxSelected>>", update_setting_talk_quality)
+    # def update_setting_talk_quality(event):
+    #     loaded_settings['setting_talk_quality'] = talk_quality_dropdown.get()
+    #     save_settings()
+    # def get_talk_quality_options():
+    #     talk_quality_options = list()
+    #     for sound_option in ['tiny', 'base', 'small', 'medium']:
+    #         os.makedirs('whisper', exist_ok=True)
+    #         path = './whisper/' + sound_option + '.pt'
+    #         if os.path.exists(path):
+    #             talk_quality_options.append(sound_option)    
+    #     return talk_quality_options
+    # talk_quality_options = get_talk_quality_options()
+    # if not talk_quality_options:
+    #     loaded_settings['setting_talk_quality'] = ""
+    # if loaded_settings['setting_talk_quality'] not in talk_quality_options:
+    #     loaded_settings['setting_talk_quality'] = "base"
+    # talk_quality_dropdown = ttk.Combobox(frame_talk_desc_quality, values=talk_quality_options, state="readonly", width=8)
+    # talk_quality_dropdown.set(loaded_settings['setting_talk_quality'])
+    # talk_quality_dropdown.grid(row=0, column=0, padx=(25,0), pady=(8,5), sticky="w")
+    # talk_quality_dropdown.bind("<<ComboboxSelected>>", update_setting_talk_quality)
     
-    def on_subwindow_close(button_name, window):
-        talk_quality_dropdown['values'] = get_talk_quality_options() # 옵션 갱신 Download쪽인데 그냥하자
-        open_subwindows.remove(button_name)
-        window.destroy()
+    # def on_subwindow_close(button_name, window):
+    #     talk_quality_dropdown['values'] = get_talk_quality_options() # 옵션 갱신 Download쪽인데 그냥하자
+    #     open_subwindows.remove(button_name)
+    #     window.destroy()
     
-    def create_sr_download_window():
-        # 기존 창 열려있는게 없을 경우. (있을 경우 포커스 잡아주려면 추가 변수 설정하기)
-        if "Sound Recognition Download" not in open_subwindows:
-            subwindow = tk.Toplevel(settings_window)
-            subwindow.title("Sound Recognition Download")
-            subwindow.protocol("WM_DELETE_WINDOW", lambda: on_subwindow_close("Sound Recognition Download", subwindow))
-            open_subwindows.add("Sound Recognition Download")
-            subwindow.geometry(f"330x240+{settings_window.winfo_x() + 50}+{settings_window.winfo_y() + 50}")        
+    # def create_sr_download_window():
+    #     # 기존 창 열려있는게 없을 경우. (있을 경우 포커스 잡아주려면 추가 변수 설정하기)
+    #     if "Sound Recognition Download" not in open_subwindows:
+    #         subwindow = tk.Toplevel(settings_window)
+    #         subwindow.title("Sound Recognition Download")
+    #         subwindow.protocol("WM_DELETE_WINDOW", lambda: on_subwindow_close("Sound Recognition Download", subwindow))
+    #         open_subwindows.add("Sound Recognition Download")
+    #         subwindow.geometry(f"330x240+{settings_window.winfo_x() + 50}+{settings_window.winfo_y() + 50}")        
             
-            sound_title_label = tk.Label(subwindow, text=get_message('sound option title'))
-            sound_title_label.grid(row=0, column=0, pady=5, sticky="nwe")   
+    #         sound_title_label = tk.Label(subwindow, text=get_message('sound option title'))
+    #         sound_title_label.grid(row=0, column=0, pady=5, sticky="nwe")   
             
-            sound_separator = ttk.Separator(subwindow, orient="horizontal")
-            sound_separator.grid(row=1, column=0, sticky="nswe", padx=8)
+    #         sound_separator = ttk.Separator(subwindow, orient="horizontal")
+    #         sound_separator.grid(row=1, column=0, sticky="nswe", padx=8)
 
-            sound_options = ['tiny', 'base', 'small', 'medium']
-            for i, sound_option in enumerate(sound_options):  
-                frame_sound = tk.Frame(subwindow, padx=10)
-                frame_sound.grid(row=i+2, column=0, sticky="nsw")
+    #         sound_options = ['tiny', 'base', 'small', 'medium']
+    #         for i, sound_option in enumerate(sound_options):  
+    #             frame_sound = tk.Frame(subwindow, padx=10)
+    #             frame_sound.grid(row=i+2, column=0, sticky="nsw")
                 
-                path = './whisper/' + sound_option + '.pt'
-                status = "YES" if os.path.exists(path) else "NONE"
+    #             path = './whisper/' + sound_option + '.pt'
+    #             status = "YES" if os.path.exists(path) else "NONE"
                 
-                sound_option_label = tk.Label(frame_sound,  anchor="w", text=sound_option, width=6)
-                sound_option_label.grid(row=0, column=0, pady=5, sticky="e")
+    #             sound_option_label = tk.Label(frame_sound,  anchor="w", text=sound_option, width=6)
+    #             sound_option_label.grid(row=0, column=0, pady=5, sticky="e")
                         
-                sound_option_desc_label = tk.Label(frame_sound,  anchor="w", text=get_message("sound option " + sound_option, is_special=True), width=24)
-                sound_option_desc_label.grid(row=0, column=1, pady=5, sticky="e", padx=5)
-                if status == "NONE":
-                    sound_download_button = tk.Button(frame_sound, text=get_message("Download"), command=lambda option = sound_option, parent=subwindow:download_from_url(parent, 'https://huggingface.co/mingu4969/windows-archive-dist/resolve/main/whisper/'+option+'.pt?download=true','whisper/'+option+'.pt')) # lazy init 방지용
-                    sound_download_button.grid(row=0, column=2, sticky="w")
+    #             sound_option_desc_label = tk.Label(frame_sound,  anchor="w", text=get_message("sound option " + sound_option, is_special=True), width=24)
+    #             sound_option_desc_label.grid(row=0, column=1, pady=5, sticky="e", padx=5)
+    #             if status == "NONE":
+    #                 sound_download_button = tk.Button(frame_sound, text=get_message("Download"), command=lambda option = sound_option, parent=subwindow:download_from_url(parent, 'https://huggingface.co/mingu4969/windows-archive-dist/resolve/main/whisper/'+option+'.pt?download=true','whisper/'+option+'.pt')) # lazy init 방지용
+    #                 sound_download_button.grid(row=0, column=2, sticky="w")
                     
-    def create_sr_test_window():
-        if loaded_settings['setting_talk_mode'] in ["Auto", "Manual"]:
-            MessageBoxShowInfo(settings_window, "Info", "Please set [Talk] Option to OFF to avoid conflicts.")
-            return
-        if "Sound Recognition Test" not in open_subwindows:
-            subwindow = tk.Toplevel(settings_window)
-            subwindow.title("Sound Recognition Test")
-            subwindow.protocol("WM_DELETE_WINDOW", lambda: on_subwindow_close("Sound Recognition Test", subwindow))
-            open_subwindows.add("Sound Recognition Test")
-            subwindow.geometry(f"320x90+{settings_window.winfo_x() + 50}+{settings_window.winfo_y() + 50}")
+    # def create_sr_test_window():
+    #     if loaded_settings['setting_talk_mode'] in ["Auto", "Manual"]:
+    #         MessageBoxShowInfo(settings_window, "Info", "Please set [Talk] Option to OFF to avoid conflicts.")
+    #         return
+    #     if "Sound Recognition Test" not in open_subwindows:
+    #         subwindow = tk.Toplevel(settings_window)
+    #         subwindow.title("Sound Recognition Test")
+    #         subwindow.protocol("WM_DELETE_WINDOW", lambda: on_subwindow_close("Sound Recognition Test", subwindow))
+    #         open_subwindows.add("Sound Recognition Test")
+    #         subwindow.geometry(f"320x90+{settings_window.winfo_x() + 50}+{settings_window.winfo_y() + 50}")
             
-            sr_test_text_base = get_message("Current setting : ") + talk_quality_dropdown.get() +" / "+loaded_settings['setting_talk_language']+"\n"
-            sr_test_label = tk.Label(subwindow, text=sr_test_text_base, anchor='nw', justify='left', width=40, height=2, padx=5)
-            sr_test_label.grid(row=0, column=0, pady=5, sticky="nwe")   
+    #         sr_test_text_base = get_message("Current setting : ") + talk_quality_dropdown.get() +" / "+loaded_settings['setting_talk_language']+"\n"
+    #         sr_test_label = tk.Label(subwindow, text=sr_test_text_base, anchor='nw', justify='left', width=40, height=2, padx=5)
+    #         sr_test_label.grid(row=0, column=0, pady=5, sticky="nwe")   
             
-            sound_separator = ttk.Separator(subwindow, orient="horizontal")
-            sound_separator.grid(row=1, column=0, sticky="nswe", padx=8)
+    #         sound_separator = ttk.Separator(subwindow, orient="horizontal")
+    #         sound_separator.grid(row=1, column=0, sticky="nswe", padx=8)
 
-            def sr_test_equip():
-                sr_test_label.config(text = sr_test_text_base + "Finding Microphone...")
-                if check_speech_recognition_status():
-                    sr_test_label.config(text = sr_test_text_base + "Device Detected.")
-                else:
-                    sr_test_label.config(text = sr_test_text_base + "No Device Detected.")
+    #         def sr_test_equip():
+    #             sr_test_label.config(text = sr_test_text_base + "Finding Microphone...")
+    #             if check_speech_recognition_status():
+    #                 sr_test_label.config(text = sr_test_text_base + "Device Detected.")
+    #             else:
+    #                 sr_test_label.config(text = sr_test_text_base + "No Device Detected.")
 
-            def sr_test():
-                global is_talk_thread_activated, is_sr_test, talk_thread_test, sr_test_text
-                if talk_thread_test and talk_thread_test.is_alive():
-                    is_sr_test = False
-                    is_talk_thread_activated = False
-                    # talk_thread_test.join()  # $$$ 무한로딩??
-                    time.sleep(0.5)
-                    sr_test_label.config(text = sr_test_text_base + sr_test_text)
-                    return
-                if is_talk_thread_activated:
-                    sr_test_label.config(text = sr_test_text_base + "Speech recognition is already working.")
-                    return
-                sr_test_label.config(text = sr_test_text_base + "Say Something...(Click Once more to finish)")
+    #         def sr_test():
+    #             global is_talk_thread_activated, is_sr_test, talk_thread_test, sr_test_text
+    #             if talk_thread_test and talk_thread_test.is_alive():
+    #                 is_sr_test = False
+    #                 is_talk_thread_activated = False
+    #                 # talk_thread_test.join()  # $$$ 무한로딩??
+    #                 time.sleep(0.5)
+    #                 sr_test_label.config(text = sr_test_text_base + sr_test_text)
+    #                 return
+    #             if is_talk_thread_activated:
+    #                 sr_test_label.config(text = sr_test_text_base + "Speech recognition is already working.")
+    #                 return
+    #             sr_test_label.config(text = sr_test_text_base + "Say Something...(Click Once more to finish)")
                 
-                is_sr_test = True
-                is_talk_thread_activated = True
-                talk_thread_test = threading.Thread(target=talk_listener_test)
-                talk_thread_test.start()
+    #             is_sr_test = True
+    #             is_talk_thread_activated = True
+    #             talk_thread_test = threading.Thread(target=talk_listener_test)
+    #             talk_thread_test.start()
 
                 
-            frame_sound_test_button = tk.Frame(subwindow)
-            frame_sound_test_button.grid(row=2, column=0, sticky="we", padx=20)      
-            sound_test_button = tk.Button(frame_sound_test_button, text="Check Equip", width=12, padx=2, command=lambda :sr_test_equip())
-            sound_test_button.grid(row=0, column=0, sticky="we", padx=20 ,pady=5)
-            sound_test_button = tk.Button(frame_sound_test_button, text="Test", width=12, padx=2, command=lambda :sr_test())
-            sound_test_button.grid(row=0, column=1, sticky="we", padx=20 ,pady=5)
+    #         frame_sound_test_button = tk.Frame(subwindow)
+    #         frame_sound_test_button.grid(row=2, column=0, sticky="we", padx=20)      
+    #         sound_test_button = tk.Button(frame_sound_test_button, text="Check Equip", width=12, padx=2, command=lambda :sr_test_equip())
+    #         sound_test_button.grid(row=0, column=0, sticky="we", padx=20 ,pady=5)
+    #         sound_test_button = tk.Button(frame_sound_test_button, text="Test", width=12, padx=2, command=lambda :sr_test())
+    #         sound_test_button.grid(row=0, column=1, sticky="we", padx=20 ,pady=5)
 
-    open_subwindows = set()
-    talk_quality_download_btn = tk.Button(frame_talk_desc_quality, text=get_message("Download"), width=12, height=1, command=lambda: create_sr_download_window())
-    talk_quality_download_btn.grid(row=0, column=1, sticky="ew", padx=(40,10), pady=2)
-    talk_quality_test_btn = tk.Button(frame_talk_desc_quality, text=get_message("Test"), width=8, height=1, command=lambda: create_sr_test_window())
-    talk_quality_test_btn.grid(row=0, column=2, sticky="ew", padx=5, pady=2)
+    # open_subwindows = set()
+    # talk_quality_download_btn = tk.Button(frame_talk_desc_quality, text=get_message("Download"), width=12, height=1, command=lambda: create_sr_download_window())
+    # talk_quality_download_btn.grid(row=0, column=1, sticky="ew", padx=(40,10), pady=2)
+    # talk_quality_test_btn = tk.Button(frame_talk_desc_quality, text=get_message("Test"), width=8, height=1, command=lambda: create_sr_test_window())
+    # talk_quality_test_btn.grid(row=0, column=2, sticky="ew", padx=5, pady=2)
     
-    def update_talk_mode():
-        global settings_keyboard_hooks
-        global is_talk_thread_activated
-        loaded_settings['setting_talk_mode'] = talk_mode_var.get()
-        save_settings()
-        if talk_mode_var.get() == "OFF":
-            chat_key_entry.config(state=tk.DISABLED)
-            talk_key_entry.config(state=tk.DISABLED)
-            for hook in settings_keyboard_hooks:
-                keyboard.unhook(hook)
-            settings_keyboard_hooks = list()
-            deactivate_speech_recognition()
-        elif talk_mode_var.get() == "Auto":
-            chat_key_entry.config(state=tk.DISABLED)
-            talk_key_entry.config(state=tk.DISABLED)
-            for hook in settings_keyboard_hooks:
-                keyboard.unhook(hook)
-            settings_keyboard_hooks = list()
-            if not is_talk_thread_activated:
-                ask_question_box = MessageBoxAskQuestion(settings_window, "Confirm", "Want to enable voice recognition right now?")
-                settings_window.wait_window(ask_question_box)
-                if ask_question_box.result:   
-                    activate_speech_recognition()
-        elif talk_mode_var.get() == "Manual":
-            chat_key_entry.config(state=tk.DISABLED)
-            talk_key_entry.config(state=tk.NORMAL)
-            talk_key_entry.focus_set()
-            for hook in settings_keyboard_hooks:
-                keyboard.unhook(hook)
-            settings_keyboard_hooks = list()
-            hook = keyboard.hook(update_talk_key)
-            settings_keyboard_hooks.append(hook)
+    # def update_talk_mode():
+    #     global settings_keyboard_hooks
+    #     global is_talk_thread_activated
+    #     loaded_settings['setting_talk_mode'] = talk_mode_var.get()
+    #     save_settings()
+    #     if talk_mode_var.get() == "OFF":
+    #         chat_key_entry.config(state=tk.DISABLED)
+    #         talk_key_entry.config(state=tk.DISABLED)
+    #         for hook in settings_keyboard_hooks:
+    #             keyboard.unhook(hook)
+    #         settings_keyboard_hooks = list()
+    #         deactivate_speech_recognition()
+    #     elif talk_mode_var.get() == "Auto":
+    #         chat_key_entry.config(state=tk.DISABLED)
+    #         talk_key_entry.config(state=tk.DISABLED)
+    #         for hook in settings_keyboard_hooks:
+    #             keyboard.unhook(hook)
+    #         settings_keyboard_hooks = list()
+    #         if not is_talk_thread_activated:
+    #             ask_question_box = MessageBoxAskQuestion(settings_window, "Confirm", "Want to enable voice recognition right now?")
+    #             settings_window.wait_window(ask_question_box)
+    #             if ask_question_box.result:   
+    #                 activate_speech_recognition()
+    #     elif talk_mode_var.get() == "Manual":
+    #         chat_key_entry.config(state=tk.DISABLED)
+    #         talk_key_entry.config(state=tk.NORMAL)
+    #         talk_key_entry.focus_set()
+    #         for hook in settings_keyboard_hooks:
+    #             keyboard.unhook(hook)
+    #         settings_keyboard_hooks = list()
+    #         hook = keyboard.hook(update_talk_key)
+    #         settings_keyboard_hooks.append(hook)
 
-    def update_talk_key(event):
-        global is_talk_thread_activated
-        talk_key_entry.delete(0, tk.END)
-        talk_key_entry.config(state=tk.DISABLED)
-        if event.name != chat_key_var.get():        
-            talk_key_var.set(event.name)
-            loaded_settings['setting_talk_key'] = talk_key_var.get()
-            save_settings()
-        else:
-            talk_key_var.set(talk_key_old)
-            return
-        global settings_keyboard_hooks
-        for hook in settings_keyboard_hooks:
-            keyboard.unhook(hook)
-        settings_keyboard_hooks = list()
-        if not is_talk_thread_activated:
-            ask_question_box = MessageBoxAskQuestion(settings_window, "Confirm", "Want to enable voice recognition right now?")
-            settings_window.wait_window(ask_question_box)
-            if ask_question_box.result:   
-                activate_speech_recognition()
+    # def update_talk_key(event):
+    #     global is_talk_thread_activated
+    #     talk_key_entry.delete(0, tk.END)
+    #     talk_key_entry.config(state=tk.DISABLED)
+    #     if event.name != chat_key_var.get():        
+    #         talk_key_var.set(event.name)
+    #         loaded_settings['setting_talk_key'] = talk_key_var.get()
+    #         save_settings()
+    #     else:
+    #         talk_key_var.set(talk_key_old)
+    #         return
+    #     global settings_keyboard_hooks
+    #     for hook in settings_keyboard_hooks:
+    #         keyboard.unhook(hook)
+    #     settings_keyboard_hooks = list()
+    #     if not is_talk_thread_activated:
+    #         ask_question_box = MessageBoxAskQuestion(settings_window, "Confirm", "Want to enable voice recognition right now?")
+    #         settings_window.wait_window(ask_question_box)
+    #         if ask_question_box.result:   
+    #             activate_speech_recognition()
         
-    talk_mode_var = tk.StringVar(value=loaded_settings['setting_talk_mode'])
-    for column_idx, talk_mode in enumerate(["OFF", "Auto", "Manual"]):
-        talk_mode_frame = tk.Frame(frame_talk_desc_mode)
-        talk_mode_frame.grid(row=0, column=column_idx, sticky="we", padx=20)
-        talk_mode_radio = tk.Radiobutton(talk_mode_frame, text=talk_mode, variable=talk_mode_var, value=talk_mode, command=update_talk_mode)
-        talk_mode_radio.grid(row=0, column=0, sticky="we")
-    talk_key_var = tk.StringVar(value=loaded_settings['setting_talk_key'])
-    talk_key_old = talk_key_var.get()
-    talk_key_entry = tk.Entry(frame_talk_desc_mode, state=tk.DISABLED, width=10, textvariable=talk_key_var)
-    talk_key_entry.grid(row=0, column=4, padx=10, pady=2, sticky="we")
+    # talk_mode_var = tk.StringVar(value=loaded_settings['setting_talk_mode'])
+    # for column_idx, talk_mode in enumerate(["OFF", "Auto", "Manual"]):
+    #     talk_mode_frame = tk.Frame(frame_talk_desc_mode)
+    #     talk_mode_frame.grid(row=0, column=column_idx, sticky="we", padx=20)
+    #     talk_mode_radio = tk.Radiobutton(talk_mode_frame, text=talk_mode, variable=talk_mode_var, value=talk_mode, command=update_talk_mode)
+    #     talk_mode_radio.grid(row=0, column=0, sticky="we")
+    # talk_key_var = tk.StringVar(value=loaded_settings['setting_talk_key'])
+    # talk_key_old = talk_key_var.get()
+    # talk_key_entry = tk.Entry(frame_talk_desc_mode, state=tk.DISABLED, width=10, textvariable=talk_key_var)
+    # talk_key_entry.grid(row=0, column=4, padx=10, pady=2, sticky="we")
 
-    def update_talk_language():
-        loaded_settings['setting_talk_language'] = talk_language_var.get()
-        save_settings()
-    talk_language_var = tk.StringVar(value=loaded_settings['setting_talk_language'])
-    for column_idx, talk_language in enumerate(["日本語", "English", "한국어"]):
-        talk_language_frame = tk.Frame(frame_talk_desc_mode)
-        talk_language_frame.grid(row=1, column=column_idx, sticky="we", padx=20)
-        talk_language_radio = tk.Radiobutton(talk_language_frame, text=talk_language, variable=talk_language_var, value=talk_language, command=update_talk_language)
-        talk_language_radio.grid(row=0, column=0, sticky="we")
+    # def update_talk_language():
+    #     loaded_settings['setting_talk_language'] = talk_language_var.get()
+    #     save_settings()
+    # talk_language_var = tk.StringVar(value=loaded_settings['setting_talk_language'])
+    # for column_idx, talk_language in enumerate(["한국어", "English", "日本語"]):
+    #     talk_language_frame = tk.Frame(frame_talk_desc_mode)
+    #     talk_language_frame.grid(row=1, column=column_idx, sticky="we", padx=20)
+    #     talk_language_radio = tk.Radiobutton(talk_language_frame, text=talk_language, variable=talk_language_var, value=talk_language, command=update_talk_language)
+    #     talk_language_radio.grid(row=0, column=0, sticky="we")
 
     # Frame : Conversation > Translator > Label, desc
     # frame_translator = tk.Frame(frame_conversation)
@@ -3319,19 +3325,19 @@ def open_settings(e=None):
     # gravity_btn.grid(row=0, column=6, padx=10, sticky="we")
 
     # Frame : Action > Gravity, Mobility, Speed > Label, desc
-    frame_collision = tk.Frame(frame_action)
-    frame_collision.grid(row=2, column=0, sticky="we")
-    collision_label = tk.Label(frame_collision, text="Collision", width=8, justify='left')
-    collision_label.grid(row=0, column=0, padx=5, sticky="w")
-    def update_collision():
-        loaded_settings['setting_collision'] = collision_var.get()
-        save_settings()
-    collision_var = tk.StringVar(value=loaded_settings['setting_collision'])
-    for column_idx, collision in enumerate(["OFF", "Task bar"]):
-        collision_frame = tk.Frame(frame_collision)
-        collision_frame.grid(row=0, column=column_idx+1, sticky="we", padx=20)
-        collision_radio = tk.Radiobutton(collision_frame, text=collision, variable=collision_var, value=collision, command=update_collision)
-        collision_radio.grid(row=0, column=0, sticky="we")
+    # frame_collision = tk.Frame(frame_action)
+    # frame_collision.grid(row=2, column=0, sticky="we")
+    # collision_label = tk.Label(frame_collision, text="Collision", width=8, justify='left')
+    # collision_label.grid(row=0, column=0, padx=5, sticky="w")
+    # def update_collision():
+    #     loaded_settings['setting_collision'] = collision_var.get()
+    #     save_settings()
+    # collision_var = tk.StringVar(value=loaded_settings['setting_collision'])
+    # for column_idx, collision in enumerate(["OFF", "Task bar"]):
+    #     collision_frame = tk.Frame(frame_collision)
+    #     collision_frame.grid(row=0, column=column_idx+1, sticky="we", padx=20)
+    #     collision_radio = tk.Radiobutton(collision_frame, text=collision, variable=collision_var, value=collision, command=update_collision)
+    #     collision_radio.grid(row=0, column=0, sticky="we")
 
     # 프레임간 여백 추가
     frame_space = tk.Frame(settings_window, height=8)
@@ -3472,16 +3478,16 @@ def open_ai_settings():
         loaded_settings[setting_key] = value
         save_settings()
         
-    # Stream settings
-    frame_stream = tk.Frame(ai_settings_window, padx=10)
-    frame_stream.grid(row=frame_row_idx, column=0, sticky="nsew")
-    stream_label = tk.Label(frame_stream, text="Stream", width=10, anchor='w')
-    stream_label.grid(row=0, column=0, padx=10, pady=5, sticky="w")
-    stream_var = tk.StringVar(value=loaded_settings['setting_ai_stream'])
-    for col_idx, option in enumerate(["off", "on"]):
-        stream_radio = tk.Radiobutton(frame_stream, text=option, variable=stream_var, value=option, command=lambda: update_setting('setting_ai_stream', stream_var.get()))
-        stream_radio.grid(row=0, column=col_idx + 1, padx=5, pady=5, sticky="w")
-    frame_row_idx += 1
+    # Stream settings  # 기본 on
+    # frame_stream = tk.Frame(ai_settings_window, padx=10)
+    # frame_stream.grid(row=frame_row_idx, column=0, sticky="nsew")
+    # stream_label = tk.Label(frame_stream, text="Stream", width=10, anchor='w')
+    # stream_label.grid(row=0, column=0, padx=10, pady=5, sticky="w")
+    # stream_var = tk.StringVar(value=loaded_settings['setting_ai_stream'])
+    # for col_idx, option in enumerate(["off", "on"]):
+    #     stream_radio = tk.Radiobutton(frame_stream, text=option, variable=stream_var, value=option, command=lambda: update_setting('setting_ai_stream', stream_var.get()))
+    #     stream_radio.grid(row=0, column=col_idx + 1, padx=5, pady=5, sticky="w")
+    # frame_row_idx += 1
     
     # sr settings
     frame_sr = tk.Frame(ai_settings_window, padx=10)
@@ -3925,8 +3931,10 @@ def regenerate(question):
                     last_reply_len = len(reply_list)    
                     if len(reply_list) == 1:  # 최초 문장      
                         reply_new = reply_list[-1]
-                        result_ko = translator_Google.translate(reply_new, dest='ko').text
-                        result_jp = translator_Google.translate(reply_new, dest='ja').text    
+                        result_ko = translator_google.translate(reply_new, dest='ko').text
+                        result_ko = change_to_ko(result_ko)
+                        result_jp = translator_google.translate(reply_new, dest='ja').text    
+                        result_jp = change_to_jp(result_jp)
                         answer['setting_lang'] = 'en'
                         if loaded_settings['setting_chat_language'] == '日本語':
                             answer['setting_lang'] = 'jp'
@@ -3947,8 +3955,10 @@ def regenerate(question):
                         set_status('talk')   
                     else:          
                         reply_new = reply_list[-1]
-                        result_ko = translator_Google.translate(reply_new, dest='ko').text
-                        result_jp = translator_Google.translate(reply_new, dest='ja').text
+                        result_ko = translator_google.translate(reply_new, dest='ko').text
+                        result_ko = change_to_ko(result_ko)
+                        result_jp = translator_google.translate(reply_new, dest='ja').text
+                        result_jp = change_to_jp(result_jp)
                         # 음성합성 추가
                         audio = os.path.abspath('.').replace('\\','/') +'/' + synthesize_char('korean', result_ko, use_cuda=is_use_cuda, type='single', sid=0)
                         play_wav_queue_add(audio)
@@ -3983,8 +3993,10 @@ def regenerate(question):
                 last_reply_len = len(reply_list)    
                 if len(reply_list) == 1:  # 최초 문장      
                     reply_new = reply_list[-1]
-                    result_ko = translator_Google.translate(reply_new, dest='ko').text
-                    result_jp = translator_Google.translate(reply_new, dest='ja').text    
+                    result_ko = translator_google.translate(reply_new, dest='ko').text
+                    result_ko = change_to_ko(result_ko)
+                    result_jp = translator_google.translate(reply_new, dest='ja').text    
+                    result_jp = change_to_jp(result_jp)
                     answer['setting_lang'] = 'en'
                     if loaded_settings['setting_chat_language'] == '日本語':
                         answer['setting_lang'] = 'jp'
@@ -4005,8 +4017,10 @@ def regenerate(question):
                     set_status('talk')   
                 else:          
                     reply_new = reply_list[-1]
-                    result_ko = translator_Google.translate(reply_new, dest='ko').text
-                    result_jp = translator_Google.translate(reply_new, dest='ja').text
+                    result_ko = translator_google.translate(reply_new, dest='ko').text
+                    result_ko = change_to_ko(result_ko)
+                    result_jp = translator_google.translate(reply_new, dest='ja').text
+                    result_jp = change_to_jp(result_jp)
                     # 음성합성 추가
                     audio = os.path.abspath('.').replace('\\','/') +'/' + synthesize_char('korean', result_ko, use_cuda=is_use_cuda, type='single', sid=0)
                     play_wav_queue_add(audio)
@@ -4058,8 +4072,10 @@ def conversation_web(trans_question):
             last_reply_len = len(reply_list)    
             if len(reply_list) == 1:  # 최초 문장      
                 reply_new = reply_list[-1]
-                result_ko = translator_Google.translate(reply_new, dest='ko').text
-                result_jp = translator_Google.translate(reply_new, dest='ja').text    
+                result_ko = translator_google.translate(reply_new, dest='ko').text
+                result_ko = change_to_ko(result_ko)
+                result_jp = translator_google.translate(reply_new, dest='ja').text    
+                result_jp = change_to_jp(result_jp)
                 answer['setting_lang'] = 'en'
                 if loaded_settings['setting_chat_language'] == '日本語':
                     answer['setting_lang'] = 'jp'
@@ -4080,8 +4096,10 @@ def conversation_web(trans_question):
                 set_status('talk')   
             else:          
                 reply_new = reply_list[-1]
-                result_ko = translator_Google.translate(reply_new, dest='ko').text
-                result_jp = translator_Google.translate(reply_new, dest='ja').text
+                result_ko = translator_google.translate(reply_new, dest='ko').text
+                result_ko = change_to_ko(result_ko)
+                result_jp = translator_google.translate(reply_new, dest='ja').text
+                result_jp = change_to_jp(result_jp)
                 # 음성합성 추가
                 audio = os.path.abspath('.').replace('\\','/') +'/' + synthesize_char('korean', result_ko, use_cuda=is_use_cuda, type='single', sid=0)
                 play_wav_queue_add(audio)
@@ -4101,7 +4119,7 @@ def conversation_web(trans_question):
 
 def conversation(user_input):
     global query_ai_translation_question, query_ai_intent, query_ai_rag_story, query_ai_conversation, query_ai_translation_jp, query_ai_translation_ko, query_ai_translation_en
-    global translator_Google
+    global translator_google
     global is_focus
     global answer_balloon
     global global_sound_queue_history
@@ -4122,7 +4140,7 @@ def conversation(user_input):
       
     trans_question = ''
     if True: # 우선 구글 번역으로 통일 (translate_google 참조)
-        trans_question = translator_Google.translate(user_input, dest='en').text  
+        trans_question = translator_google.translate(user_input, dest='en').text  
     else:
         trans_question = ai_translation_question.process(user_input)
         trans_question = trans_question.split('translation: ')[1].split('\n')[0]
@@ -4145,8 +4163,10 @@ def conversation(user_input):
                 last_reply_len = len(reply_list)    
                 if len(reply_list) == 1:  # 최초 문장      
                     reply_new = reply_list[-1]
-                    result_ko = translator_Google.translate(reply_new, dest='ko').text
-                    result_jp = translator_Google.translate(reply_new, dest='ja').text    
+                    result_ko = translator_google.translate(reply_new, dest='ko').text
+                    result_ko = change_to_ko(result_ko)
+                    result_jp = translator_google.translate(reply_new, dest='ja').text    
+                    result_jp = change_to_jp(result_jp)
                     answer['setting_lang'] = 'en'
                     if loaded_settings['setting_chat_language'] == '日本語':
                         answer['setting_lang'] = 'jp'
@@ -4167,8 +4187,10 @@ def conversation(user_input):
                     set_status('talk')   
                 else:          
                     reply_new = reply_list[-1]
-                    result_ko = translator_Google.translate(reply_new, dest='ko').text
-                    result_jp = translator_Google.translate(reply_new, dest='ja').text
+                    result_ko = translator_google.translate(reply_new, dest='ko').text
+                    result_ko = change_to_ko(result_ko)
+                    result_jp = translator_google.translate(reply_new, dest='ja').text
+                    result_jp = change_to_jp(result_jp)
                     # 음성합성 추가
                     audio = os.path.abspath('.').replace('\\','/') +'/' + synthesize_char('korean', result_ko, use_cuda=is_use_cuda, type='single', sid=0)
                     play_wav_queue_add(audio)
@@ -4197,6 +4219,7 @@ def conversation(user_input):
     intent_response = ''
     if loaded_settings["setting_ai_web"] == "on" or loaded_settings["setting_ai_story"] == "on" or loaded_settings["setting_ai_memory"] == "on" :
         intent_response = ai_intent_reader.process(trans_question)
+        print('intent_response', intent_response)
         
     response_web_result = None
     if "web: True" in intent_response:
@@ -4250,8 +4273,10 @@ def conversation(user_input):
             last_reply_len = len(reply_list)    
             if len(reply_list) == 1:  # 최초 문장      
                 reply_new = reply_list[-1]
-                result_ko = translator_Google.translate(reply_new, dest='ko').text
-                result_jp = translator_Google.translate(reply_new, dest='ja').text    
+                result_ko = translator_google.translate(reply_new, dest='ko').text
+                result_ko = change_to_ko(result_ko)
+                result_jp = translator_google.translate(reply_new, dest='ja').text    
+                result_jp = change_to_jp(result_jp)
                 answer['setting_lang'] = 'en'
                 if loaded_settings['setting_chat_language'] == '日本語':
                     answer['setting_lang'] = 'jp'
@@ -4272,8 +4297,10 @@ def conversation(user_input):
                 set_status('talk')   
             else:          
                 reply_new = reply_list[-1]
-                result_ko = translator_Google.translate(reply_new, dest='ko').text
-                result_jp = translator_Google.translate(reply_new, dest='ja').text
+                result_ko = translator_google.translate(reply_new, dest='ko').text
+                result_ko = change_to_ko(result_ko)
+                result_jp = translator_google.translate(reply_new, dest='ja').text
+                result_jp = change_to_jp(result_jp)
                 # 음성합성 추가
                 audio = os.path.abspath('.').replace('\\','/') +'/' + synthesize_char('korean', result_ko, use_cuda=is_use_cuda, type='single', sid=0)
                 play_wav_queue_add(audio)
@@ -4323,8 +4350,10 @@ def active_trigger(trigger='idle'):
             last_reply_len = len(reply_list)    
             if len(reply_list) == 1:  # 최초 문장      
                 reply_new = reply_list[-1]
-                result_ko = translator_Google.translate(reply_new, dest='ko').text
-                result_jp = translator_Google.translate(reply_new, dest='ja').text    
+                result_ko = translator_google.translate(reply_new, dest='ko').text
+                result_ko = change_to_ko(result_ko)
+                result_jp = translator_google.translate(reply_new, dest='ja').text    
+                result_jp = change_to_jp(result_jp)
                 answer['setting_lang'] = 'en'
                 if loaded_settings['setting_chat_language'] == '日本語':
                     answer['setting_lang'] = 'jp'
@@ -4345,8 +4374,10 @@ def active_trigger(trigger='idle'):
                 set_status('talk')   
             else:          
                 reply_new = reply_list[-1]
-                result_ko = translator_Google.translate(reply_new, dest='ko').text
-                result_jp = translator_Google.translate(reply_new, dest='ja').text
+                result_ko = translator_google.translate(reply_new, dest='ko').text
+                result_ko = change_to_ko(result_ko)
+                result_jp = translator_google.translate(reply_new, dest='ja').text
+                result_jp = change_to_jp(result_jp)
                 # 음성합성 추가
                 audio = os.path.abspath('.').replace('\\','/') +'/' + synthesize_char('korean', result_ko, use_cuda=is_use_cuda, type='single', sid=0)
                 play_wav_queue_add(audio)
@@ -4603,8 +4634,8 @@ if __name__ == "__main__":
     # else:
     #     menu.add_command(label="History", command=lambda: show_update_message())
     menu.add_command(label="Clear Conversation", command=memory.reset_conversation_memory)
-    menu.add_separator()  
-    menu.add_command(label="Version", command=open_versions)
+    # menu.add_separator()  
+    # menu.add_command(label="Version", command=open_versions)
 
     # 종료    
     menu.add_separator()  
