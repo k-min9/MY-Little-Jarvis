@@ -71,9 +71,15 @@ class ProperNounsScreen(tk.Toplevel):
         self.canvas.pack(side="left", fill="both", expand=True)
         self.scrollbar.pack(side="right", fill="y")
         
-        # 저장하기 버튼 생성 (스크롤 밖 하단에 위치)
-        self.save_button = tk.Button(self, text="저장하기", command=self.save_and_exit)
-        self.save_button.pack(side="bottom", padx=10, pady=(0,10), anchor="s")
+        # 저장하기 및 초기화하기 버튼 생성
+        button_frame = tk.Frame(self)
+        button_frame.pack(side="bottom", padx=10, pady=(0,10), anchor="s")
+
+        self.reset_button = tk.Button(button_frame, text="초기화하기", command=self.reset_proper_nouns)
+        self.reset_button.pack(side="left", padx=5)
+        
+        self.save_button = tk.Button(button_frame, text="저장하기", command=self.save_and_exit)
+        self.save_button.pack(side="right", padx=5)
         
         # 고유명사 목록 표시
         self.update_displayed_nouns()
@@ -182,6 +188,48 @@ class ProperNounsScreen(tk.Toplevel):
         save_button = tk.Button(button_frame, text="Save", command=save)
         save_button.pack(side="right")
 
+    # 고유명사 데이터를 초기화하는 함수
+    def reset_proper_nouns(self):
+        if messagebox.askyesno("Reset", "정말 초기화하시겠습니까?"):
+            self.proper_nouns = [
+                {
+                    "eng": "shittim chest",
+                    "ko": "싯딤의 상자",
+                    "jp": "シッテムの箱"
+                },
+                {
+                    "eng": "shittim box",
+                    "ko": "싯딤의 상자",
+                    "jp": "シッテムの箱"
+                },
+                {
+                    "eng": "shittim",
+                    "ko": "싯딤",
+                    "jp": "シッテム"
+                },
+                {
+                    "eng": "kivotos",
+                    "ko": "키보토스",
+                    "jp": "キヴォトス"
+                },
+                {
+                    "eng": "halo",
+                    "ko": "헤일로",
+                    "jp": "ヘイロー"
+                }, 
+                {
+                    "eng": "teacher",
+                    "ko": "선생님",
+                    "jp": "先生"
+                }, 
+                {
+                    "eng": "sensei",
+                    "ko": "선생님",
+                    "jp": "先生"
+                }
+            ]
+            self.update_displayed_nouns()  # 화면에 반영
+
     # 저장 확인 및 저장 후 종료 함수
     def save_and_exit(self):
         if messagebox.askyesno("Save", "저장하고 종료하시겠습니까?"):
@@ -199,14 +247,30 @@ class ProperNounsScreen(tk.Toplevel):
 def get_proper_list():
     return [noun['eng'] for noun in load_proper_nouns()]
 
-# 문자열에서 영어 이름을 일본어 이름으로 바꾸는 함수
 def change_to_jp(input_string):
     proper_list = load_proper_nouns()
     input_string = input_string.lower()
     
+    # 영어 이름의 길이가 긴 순서에서 짧은 순서로 정렬
+    proper_list.sort(key=lambda noun: len(noun['eng']), reverse=True)
+    
     for noun in proper_list:
-        if noun['eng'].lower() in input_string:
+        while noun['eng'].lower() in input_string:
             input_string = input_string.replace(noun['eng'].lower(), noun['jp'])
+    
+    return input_string
+
+# 고유명사가 섞인 ko string 수정
+def change_to_ko(input_string):
+    proper_list = load_proper_nouns()
+    input_string = input_string.lower()
+    
+    # 영어 이름의 길이가 긴 순서에서 짧은 순서로 정렬
+    proper_list.sort(key=lambda noun: len(noun['eng']), reverse=True)
+    
+    for noun in proper_list:
+        while noun['eng'].lower() in input_string:
+            input_string = input_string.replace(noun['eng'].lower(), noun['ko'])
     
     return input_string
 
