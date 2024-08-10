@@ -10,6 +10,7 @@
 /memory
 /dist
 /build
+/legacy
 
 *.pth
 *.gguf
