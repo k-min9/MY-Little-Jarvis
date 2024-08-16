@@ -19,7 +19,7 @@ def load_model(is_use_cuda=False):
         llm = get_llm()
     else:
         from ai_llama_cpp_model import LlamaCppModel 
-        llm, tokenizer = LlamaCppModel.from_pretrained('./model/llama-3-neural-chat-v1-8b-Q4_K_M.gguf')
+        llm, tokenizer = LlamaCppModel.from_pretrained('./model/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf')
 
 def process_stream(query, player, character, is_sentence, is_regenerate, info_rag=None, info_memory=None, info_web=None):
     global llm
