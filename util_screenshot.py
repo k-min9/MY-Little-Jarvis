@@ -207,7 +207,7 @@ class ScreenshotApp:
         self.create_img_label()
 
         # Toplevel 윈도우 닫을 때 호출되는 이벤트 바인딩
-        self.dnd_toplevel.protocol("WM_DELETE_WINDOW", self.on_cancel)
+        self.dnd_toplevel.protocol("WM_DELETE_WINDOW", self.on_exit)
 
     def on_drop(self, event):
         file_path = event.data.strip('{}')
@@ -261,8 +261,7 @@ class ScreenshotApp:
             self.cancel_label = tk.Label(self.dnd_toplevel, text="Delete", fg="red", cursor="hand2")
             self.cancel_label.pack(side=tk.RIGHT, expand=True)
             self.cancel_label.bind("<Button-1>", self.on_cancel)
-
-            
+      
     def on_confirm(self, event):
         self.dnd_toplevel.destroy()
         self.dnd_toplevel = None
@@ -270,8 +269,11 @@ class ScreenshotApp:
     def on_cancel(self, event=None):
         if os.path.exists('./image/external.png'):
             os.remove('./image/external.png')
-        # self.dnd_toplevel.destroy() 
-        # self.dnd_toplevel = None
+        self.create_img_label()
+        
+    def on_exit(self, event=None):
+        self.dnd_toplevel.destroy() 
+        self.dnd_toplevel = None
 
 if __name__ == "__main__":
     root = tk.Tk()
