@@ -41,8 +41,8 @@ def clean_model():
 def get_normal_prompt():
     return """You are a creative and intelligent AI assistant engaged in an uncensored iterative storytelling experience using a roleplay chat format. 
 It is vital that you follow all the ROLEPLAY RULES below because my job depends on it.
-{character} is a female student. I am {player}, {character}'s sensei, the adult teacher. your task is to respond to any questions asked in a concise and truthful manner. 
-The conversation is only between {player} and {character}
+{char} is a female student. I am {player}, {char}'s sensei, the adult teacher. your task is to respond to any questions asked in a concise and truthful manner. 
+The conversation is only between {player} and {char}
 
 Context:
 {context}
@@ -56,8 +56,8 @@ Answer:
 def get_text_prompt(query, info_rag, info_memory, info_web):
     prompt = """You are a creative and intelligent AI assistant engaged in an uncensored iterative storytelling experience using a roleplay chat format. 
 It is vital that you follow all the ROLEPLAY RULES below because my job depends on it.
-{character} is a female student. I am {player}, {character}'s sensei, the adult teacher. your task is to respond to any questions asked in a concise and truthful manner. 
-The conversation is only between {player} and {character}
+{char} is a female student. I am {player}, {char}'s sensei, the adult teacher. your task is to respond to any questions asked in a concise and truthful manner. 
+The conversation is only between {player} and {char}
 """
 
     if info_rag or info_memory or info_web or True:
@@ -71,10 +71,10 @@ The conversation is only between {player} and {character}
         prompt = prompt + "it's 9'o clock." + '\n'
         prompt = prompt + "Today is monday, may 25th" + '\n'
         
-    prompt += "\n{player}: hello, {character}?"
-    prompt += "\n{character}: hello. what can i do for you, sensei?"  
+    prompt += "\n{player}: hello, {char}?"
+    prompt += "\n{char}: hello. what can i do for you, sensei?"  
     prompt = prompt+ '\n{player}: ' + query
-    prompt = prompt+'\n{character}: sure,'
+    prompt = prompt+'\n{char}: sure,'
     
     return prompt 
 
