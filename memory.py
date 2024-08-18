@@ -72,7 +72,7 @@ def get_truncated_conversation_memory(max_len=2048):
 
 def get_greeting_dialogue():
     greeting_list = list()
-    greeting_list.append({'speaker': 'player', 'message': 'hello, {character}?', 'message_trans': 'hello, {character}?'})
+    greeting_list.append({'speaker': 'player', 'message': 'hello, {char}?', 'message_trans': 'hello, {char}?'})
     greeting_list.append({'speaker': 'character', 'message': 'hello. what can i do for you, sensei?', 'message_trans': 'hello. what can i do for you, sensei?'})
     
     greeting_len = 0
@@ -104,15 +104,15 @@ def get_text_prompt():
     # memory를 포함한 대화 내역 생성
     prompt = ''
     if local_memory_len <=0:
-        prompt += "\n{player}:hello, {character}?"
-        prompt += "\n{character}:hello. what can i do for you, sensei?" 
+        prompt += "\n{player}:hello, {char}?"
+        prompt += "\n{char}:hello. what can i do for you, sensei?" 
     else:
         conversation_memory, memory_len, memory_cnt = get_truncated_conversation_memory(2048)
         for memory in conversation_memory:
             if memory['speaker'] == 'player':
                 prompt += "\n{player}:"+memory['message_trans']
             elif memory['speaker'] == 'character':
-                prompt += "\n{character}:"+memory['message_trans']
+                prompt += "\n{char}:"+memory['message_trans']
     return prompt
 
 
@@ -129,7 +129,7 @@ def get_chatLM_prompt():
         if memory['speaker'] == 'player':
             prompt += add_chatLM_prompt('user', '{player}', memory['message_trans'])
         elif memory['speaker'] == 'character':
-            prompt += add_chatLM_prompt('assistant', '{character}', memory['message_trans'])
+            prompt += add_chatLM_prompt('assistant', '{char}', memory['message_trans'])
     return prompt
     
 # 2048 글자(token보다 낮을 수 밖에 없음)
