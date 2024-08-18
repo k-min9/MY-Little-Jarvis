@@ -2,10 +2,26 @@ import json
 import os
 import prompt_main
 
+# 파일이름으로 가져오기
+def get_file_name():
+    file_name = './memory/conversation_memory.json'
+    try:
+        cur_conversation = ''
+        with open('memory/history_meta.json', 'r', encoding='utf-8') as file:
+            history_meta = json.load(file)
+            if 'cur_conversation' in history_meta:
+                cur_conversation = history_meta['cur_conversation']
+            if 'conversations' in history_meta and cur_conversation in cur_conversation['conversations']:
+                file_name = cur_conversation['conversations'][cur_conversation]['filename']
+    except:
+        # 파일이 없을 경우 기본값 설정
+        file_name = './memory/conversation_memory.json'
+    return file_name
+
 def save_conversation_memory(speaker, message, message_trans=''):
     if not message_trans:
         message_trans = message
-    conversation_memory_file = './memory/conversation_memory.json'
+    conversation_memory_file = get_file_name()
     try:
         with open(conversation_memory_file, 'r', encoding='utf-8') as file:
             data = json.load(file)
@@ -19,7 +35,7 @@ def save_conversation_memory(speaker, message, message_trans=''):
         json.dump(data, file, ensure_ascii=False, indent=4)
 
 def get_all_conversation_memory():
-    conversation_memory_file = './memory/conversation_memory.json'
+    conversation_memory_file = get_file_name()
     if not os.path.exists(conversation_memory_file):
         return []
     try:
@@ -30,7 +46,7 @@ def get_all_conversation_memory():
         return []
 
 def get_latest_conversation_memory(conversation_memory_number):
-    conversation_memory_file = './memory/conversation_memory.json'
+    conversation_memory_file = get_file_name()
     if not os.path.exists(conversation_memory_file):
         return []
     try:
@@ -41,7 +57,7 @@ def get_latest_conversation_memory(conversation_memory_number):
         return []
 
 def reset_conversation_memory():
-    conversation_memory_file = './memory/conversation_memory.json'
+    conversation_memory_file = get_file_name()
     os.makedirs('./memory', exist_ok=True)
     with open(conversation_memory_file, 'w', encoding='utf-8') as file:
         json.dump([], file)
@@ -83,7 +99,7 @@ def get_greeting_dialogue():
 
 # 마지막 대화 지우기
 def delete_recent_dialogue():
-    conversation_memory_file = './memory/conversation_memory.json'
+    conversation_memory_file = get_file_name()
     if not os.path.exists(conversation_memory_file):
         return
     try:
