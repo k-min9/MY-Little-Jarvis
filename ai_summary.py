@@ -12,7 +12,7 @@ llm = None
 
 generation_lock = Lock()
 
-def load_model(is_use_cuda=False):
+def load_model(is_use_cuda=True):  # 현재 CPU 오류 + history 등 외부 호출 고려
     global llm
     if check_llm():
         llm = get_llm()
