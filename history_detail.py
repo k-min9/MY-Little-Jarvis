@@ -3,9 +3,10 @@ from tkinter import filedialog
 import json
 import os
 import pickle
+import googletrans # 번역 관련
 
 from util_balloon import MessageBoxAskQuestion, MessageBoxShowInfo
-
+import state
 from messages import getMessage
 
 history_detail_screen = None
@@ -52,7 +53,13 @@ class historyDetailScreen(tk.Toplevel):
         super().__init__(master)
         self.title(item['title'])
         self.protocol("WM_DELETE_WINDOW", lambda:on_window_close(callback))
-        self.language = 'en'
+        
+        self.language = state.get_g_language()
+        self.translator = None
+        try:
+           self.translator = googletrans.Translator()
+        except:
+            pass
         
         self.item = item
         self.item_key = item['time']
@@ -202,7 +209,6 @@ class historyDetailScreen(tk.Toplevel):
         
     def summary_title(self):
         new_title = self.summary_title_stream()
-        print('new', new_title)
         if new_title:
             # title 변경
             self.title(new_title)
@@ -243,10 +249,18 @@ class historyDetailScreen(tk.Toplevel):
         new_title = [None]
  
         for title_info in title_infos:
-            title = title_info['title']
+            title = title_info['title']            
             title_reason = ''
             if 'reason' in title_info:
                 title_reason = title_info['reason']
+                
+            # google trans 번역으로 title 및 reason 번역
+            if self.translator:
+                try:
+                    title = self.translator.translate(title, dest=self.language).text  
+                    title_reason = self.translator.translate(title_reason, dest=self.language).text  
+                except:
+                    pass
 
             frame = tk.Frame(top)
             frame.pack(fill="x", padx=10, pady=5)
@@ -273,13 +287,13 @@ class historyDetailScreen(tk.Toplevel):
         top.wait_window()
         return new_title[0]
         
-    def get_checked_titles(self):
-        checked_titles = []
-        for frame in self.frames:
-            if self.checkbutton_dict[frame.winfo_children()[0]].get() == 1:  # Check if checkbox is checked
-                title_label = frame.winfo_children()[1]
-                checked_titles.append(title_label.cget("text"))
-        return checked_titles
+    # def get_checked_titles(self):
+    #     checked_titles = []
+    #     for frame in self.frames:
+    #         if self.checkbutton_dict[frame.winfo_children()[0]].get() == 1:  # Check if checkbox is checked
+    #             title_label = frame.winfo_children()[1]
+    #             checked_titles.append(title_label.cget("text"))
+    #     return checked_titles
         
     def import_data_init(self, datas):
         # file_path = "./memory/conversation_memoryAA.json"
