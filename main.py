@@ -39,6 +39,7 @@ from messages import getMessage
 from inference_ko import synthesize_char
 from screeninfo import get_monitors
 import memory
+import history
 
 import state
 import ai_intent_reader
@@ -4629,10 +4630,8 @@ if __name__ == "__main__":
     # menu.add_command(label="S.Balloon", command=lambda: show_status_balloon(image_folder='./assets/fx/loading2'))
     # menu.add_command(label="K.Balloon", command=kill_status_balloon)
     menu.add_separator()  
-    # if DEV_MODE:
-    #     menu.add_command(label="History", command=lambda: history.open_history_screen(root))
-    # else:
-    #     menu.add_command(label="History", command=lambda: show_update_message())
+    menu.add_command(label="History", command=lambda: history.open_history_screen(root))
+    # menu.add_command(label="History", command=lambda: show_update_message())
     menu.add_command(label="Clear Conversation", command=memory.reset_conversation_memory)
     # menu.add_separator()  
     # menu.add_command(label="Version", command=open_versions)
