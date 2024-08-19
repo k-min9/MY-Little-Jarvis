@@ -208,22 +208,25 @@ class historyDetailScreen(tk.Toplevel):
         self.frames.remove(frame)
         
     def summary_title(self):
-        new_title = self.summary_title_stream()
-        if new_title:
-            # title 변경
-            self.title(new_title)
-            self.item['title'] = new_title
-            
-            # 파일 새로 열고 저장
-            try:
-                with open('memory/history_meta.json', 'r', encoding='utf-8') as file:
-                    history_meta = json.load(file)
-                history_meta['conversations'][self.item_key]['title'] = new_title
-                with open('memory/history_meta.json', 'w', encoding='utf-8') as file:
-                    json.dump(history_meta, file, ensure_ascii=False, indent=4)    
-                print('change memory/history_meta.json')
-            except:
-                pass
+        ask_question_box = MessageBoxAskQuestion(self, "Confirm", "Suggest title suggestions from conversation history.")
+        self.wait_window(ask_question_box)
+        if ask_question_box.result:  
+            new_title = self.summary_title_stream()
+            if new_title:
+                # title 변경
+                self.title(new_title)
+                self.item['title'] = new_title
+                
+                # 파일 새로 열고 저장
+                try:
+                    with open('memory/history_meta.json', 'r', encoding='utf-8') as file:
+                        history_meta = json.load(file)
+                    history_meta['conversations'][self.item_key]['title'] = new_title
+                    with open('memory/history_meta.json', 'w', encoding='utf-8') as file:
+                        json.dump(history_meta, file, ensure_ascii=False, indent=4)    
+                    print('change memory/history_meta.json')
+                except:
+                    pass
         
     def summary_title_stream(self):
         import ai_title
