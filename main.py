@@ -53,6 +53,7 @@ from proper_nouns import change_to_jp, change_to_ko  # 고유명사 번역
 
 is_program_ended = False
 is_use_cuda = False
+use_vram_gb = 0
 
 # 전역 변수
 loaded_settings = dict()
@@ -373,7 +374,7 @@ class LoadingOptionScreen:
     def __init__(self, master):
         self.master = master
         self.master.title("Select Option")
-        self.master.geometry("300x200")
+        self.master.geometry("220x180")
         icon_path = 'assets/ico/icon_arona.ico'
         self.master.iconbitmap(icon_path)
         self.custom_window = None
@@ -381,11 +382,11 @@ class LoadingOptionScreen:
 
         # Title Label
         self.title_label = ttk.Label(master, text="Select Option", anchor="center", font=("Arial", 14))
-        self.title_label.pack(pady=10)
+        self.title_label.grid(row=0, column=0, columnspan=2, pady=10)
 
         # frame_gpu for Radio Buttons
         self.frame_gpu = ttk.Frame(master)
-        self.frame_gpu.pack(pady=10)
+        self.frame_gpu.grid(row=1, column=0, columnspan=2, pady=10, padx=5)
 
         # Option Variable
         self.option_var2 = tk.StringVar(value=self.load_option2())
@@ -399,10 +400,34 @@ class LoadingOptionScreen:
         self.cpu_radio.pack(side='left', padx=5)
         self.gpu_radio.pack(side='left', padx=5)
 
-        # Frame for Radio Buttons
-        self.frame = ttk.Frame(master)
-        self.frame.pack(pady=10)
+        # Frame for VRAM Entry
+        # 0번 GPU의 남은 VRAM을 GB 단위로 반환하는 함수
+        def get_available_vram_gb():
+            from pynvml import nvmlInit, nvmlDeviceGetHandleByIndex, nvmlDeviceGetMemoryInfo, nvmlShutdown
+            max_vram = 8
+            try:
+                nvmlInit()
+                handle = nvmlDeviceGetHandleByIndex(0)  # 0번 GPU
+                info = nvmlDeviceGetMemoryInfo(handle)
+                available_vram_mb = info.free // 1024**3  # 바이트를 GB로 변환
+                nvmlShutdown()
+                return min(available_vram_mb, max_vram)
+            except Exception as e:
+                print(f"Failed to get VRAM info: {e}")
+                return 0  # 기본값 8GB, 예외 발생 시
+        self.frame_vram = ttk.Frame(master)
+        self.vram_label = ttk.Label(self.frame_vram, text="VRAM (GB):")
+        self.vram_entry = ttk.Entry(self.frame_vram, width=8)
+        self.vram_entry.insert(0, str(get_available_vram_gb()))  # Default VRAM value from the GPU
+        self.vram_unit_label = ttk.Label(self.frame_vram, text="/ 8 GB")
 
+        self.vram_label.grid(row=0, column=0, padx=5)
+        self.vram_entry.grid(row=0, column=1, padx=5)
+        self.vram_unit_label.grid(row=0, column=2, padx=5)
+
+        # Frame for CPU Options (Fast, Normal, Custom)
+        self.frame_cpu_options = ttk.Frame(master)
+        
         # Option Variable
         self.option_var = tk.StringVar(value=self.load_option())
 
@@ -410,21 +435,26 @@ class LoadingOptionScreen:
         self.checked_options = self.load_options_customlist()
 
         # Radio Buttons
-        self.fast_radio = ttk.Radiobutton(self.frame, text="Fast", variable=self.option_var, value="Fast")
+        self.fast_radio = ttk.Radiobutton(self.frame_cpu_options, text="Fast", variable=self.option_var, value="Fast")
         HoverTip(self.fast_radio, "Fast loading with minimal settings")
-        self.normal_radio = ttk.Radiobutton(self.frame, text="Normal", variable=self.option_var, value="Normal")
+        self.normal_radio = ttk.Radiobutton(self.frame_cpu_options, text="Normal", variable=self.option_var, value="Normal")
         HoverTip(self.normal_radio, "Default. Enable all options")
-        self.custom_radio = ttk.Radiobutton(self.frame, text="Custom", variable=self.option_var, value="Custom", command=self.open_custom_window)
+        self.custom_radio = ttk.Radiobutton(self.frame_cpu_options, text="Custom", variable=self.option_var, value="Custom", command=self.open_custom_window)
         HoverTip(self.custom_radio, "Custom. Proceed with the selected option")
 
         self.fast_radio.pack(side='left', padx=5)
         self.normal_radio.pack(side='left', padx=5)
         self.custom_radio.pack(side='left', padx=5)
+        
+        # toggle식으로 둘 중 하나만 확성화
+        self.frame_cpu_options.grid(row=2, column=0, columnspan=2, pady=10, padx=5)
+        self.frame_vram.grid(row=2, column=0, columnspan=2, pady=10, padx=5)
+        
         self.toggle_radio_buttons()  # 라디오버튼 활성화
 
         # Confirm Button
         self.confirm_button = ttk.Button(master, text="확인", command=self.on_confirm)
-        self.confirm_button.pack(anchor='e', pady=10, padx=10)
+        self.confirm_button.grid(row=3, column=1, pady=10, padx=10, sticky='e')
         
         # self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
 
@@ -441,11 +471,18 @@ class LoadingOptionScreen:
         return loaded_settings['setting_load_option_customlist']       
 
     def save_option(self):
-        global loaded_settings, is_use_cuda
+        global loaded_settings, is_use_cuda, use_vram_gb
         loaded_settings['setting_load_option'] = self.option_var.get()
         loaded_settings['setting_program_type'] = self.option_var2.get()
         if not loaded_settings['setting_program_type'] == 'CPU':
             is_use_cuda = True
+            use_vram_gb = 0
+            try:
+                use_vram_gb = int(self.vram_entry.get())
+                state.set_use_gpu_percent(use_vram_gb)
+            except:
+                pass
+            
         save_settings()
 
     def open_custom_window(self):
@@ -523,7 +560,17 @@ class LoadingOptionScreen:
         sound_check.grid(row=3, column=1, padx=5, pady=2, sticky='w')
         
     def toggle_radio_buttons(self):
-        state = tk.NORMAL if self.option_var2.get() == 'CPU' else tk.DISABLED
+        if self.option_var2.get() == 'CPU':
+            state = tk.NORMAL
+            # Show CPU options
+            self.frame_vram.grid_remove()
+            self.frame_cpu_options.grid()
+        else:
+            state = tk.DISABLED
+            # Show VRAM options
+            self.frame_cpu_options.grid_remove()
+            self.frame_vram.grid()
+
         self.fast_radio.config(state=state)
         self.normal_radio.config(state=state)
         self.custom_radio.config(state=state)
