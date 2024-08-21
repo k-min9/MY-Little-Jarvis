@@ -7,6 +7,8 @@ import json
 is_stop_requested = False  # Stream 대답 중, 대답 중지
 is_screenshot_area_selecting = False  # 현재 스크린샷 범위 설정 중
 
+use_gpu_percent = 0 
+
 g_language = 'en'  # 언어 : ["日本語", "English", "한국어"] to ['ja', 'en', 'ko']
 
 def get_is_stop_requested():
@@ -40,4 +42,11 @@ def get_g_language():
     except:
         pass
     return g_language
-    
+
+def get_use_gpu_percent():
+    global use_gpu_percent
+    return use_gpu_percent
+
+def set_use_gpu_percent(use_vram):
+    global use_gpu_percent
+    use_gpu_percent = use_vram * 100 / 8
