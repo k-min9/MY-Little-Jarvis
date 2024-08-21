@@ -4,6 +4,7 @@ import gc
 from queue import Queue
 from threading import Thread
 import traceback
+import state
 
 
 class SingletonMeta(type):
@@ -29,10 +30,11 @@ class LlamaCppModel(metaclass=SingletonMeta):
     def __del__(self):
         self.release()
 
-    def from_pretrained(self, path, gpu_percent=100):
+    def from_pretrained(self, path):
         Llama = llama_cpp.Llama
         LlamaCache = llama_cpp.LlamaCache
 
+        gpu_percent = state.get_use_gpu_percent()
         n_gpu_layers = int(LLM_LAYERS * gpu_percent / 100)
 
         params = {
