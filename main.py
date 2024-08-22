@@ -36,6 +36,7 @@ from speech_recognition.audio import AudioData
 
 # Local module
 from messages import getMessage
+from message_ui import get_message_ui
 from inference_ko import synthesize_char
 from screeninfo import get_monitors
 import memory
@@ -3641,7 +3642,7 @@ def activate_speech_recognition():
     if is_talk_thread_activated:
         MessageBoxShowInfo(root, 'Task Success', "Speech recognition is enabled.")
         try:
-            menu.entryconfig("Activate Speech Recognition", label="Deactivate Speech Recognition", command=lambda: deactivate_speech_recognition())
+            menu.entryconfig(get_message_ui("Activate Speech Recognition"), label=get_message_ui("Deactivate Speech Recognition"), command=lambda: deactivate_speech_recognition())
         except:
             pass
     else:
@@ -3655,7 +3656,7 @@ def deactivate_speech_recognition():
     if talk_thread and talk_thread.is_alive():
         talk_thread.join()
     try:
-        menu.entryconfig("Deactivate Speech Recognition", label="Activate Speech Recognition", command=lambda: activate_speech_recognition())
+        menu.entryconfig(get_message_ui("Deactivate Speech Recognition"), label=get_message_ui("Activate Speech Recognition"), command=lambda: activate_speech_recognition())
     except:
         pass
 
@@ -3688,10 +3689,10 @@ def change_to_focus_mode():
             time.sleep(1)
     
     # 메뉴 토글
-    activate_index = find_menu_index("Activate Focus", menu)
-    menu.entryconfig("Activate Focus", label="Deactivate Focus", command=lambda: deactive_focus())
+    activate_index = find_menu_index(get_message_ui("Activate Focus"), menu)
+    menu.entryconfig(get_message_ui("Activate Focus"), label=get_message_ui("Deactivate Focus"), command=lambda: deactive_focus())
     # 메뉴 추가
-    menu.insert_command(activate_index+1, label="Show Focus Area", command=lambda: screenshotApp.show_screenshot_rect())
+    menu.insert_command(activate_index+1, label=get_message_ui("Show Focus Area"), command=lambda: screenshotApp.show_screenshot_rect())
     is_focus = True
     
     root.after(0, show_answer_balloon_simple, "I'll focus on the focus area, sensei!")
@@ -3709,10 +3710,10 @@ def deactive_focus():
     screenshotApp.toggle_continuous_save()
     
     # 메뉴 토글
-    menu.entryconfig("Deactivate Focus", label="Activate Focus", command=lambda: active_focus())
+    menu.entryconfig(get_message_ui("Deactivate Focus"), label=get_message_ui("Activate Focus"), command=lambda: active_focus())
     # 추가메뉴 삭제
-    if find_menu("Show Focus Area"):
-        menu.delete("Show Focus Area")
+    if find_menu(get_message_ui("Show Focus Area")):
+        menu.delete(get_message_ui("Show Focus Area"))
 
     is_focus = False
     
@@ -4650,42 +4651,44 @@ if __name__ == "__main__":
     anim, anim_set = init_anim()
     set_status('idle')
     
+
+    
     # 우클릭 메뉴 생성
     menu = tk.Menu(root, tearoff=0)
-    menu.add_command(label="Setting", command=open_settings)
-    menu.add_command(label="AI Setting", command=open_ai_settings)
+    menu.add_command(label=get_message_ui("Setting"), command=open_settings)
+    menu.add_command(label=get_message_ui("AI Setting"), command=open_ai_settings)
     menu.add_separator()  
-    menu.add_command(label="Idle", command=lambda: set_status("idle"))
-    menu.add_command(label="Idle Talk", command=lambda: active_trigger("idle"))
-    menu.add_command(label="Go Left", command=lambda: set_status("walk_left_lock"))
-    menu.add_command(label="Go Right", command=lambda: set_status("walk_right_lock"))
-    menu.add_command(label="Sit", command=lambda: set_status("sit_lock"))
+    menu.add_command(label=get_message_ui("Idle"), command=lambda: set_status("idle"))
+    menu.add_command(label=get_message_ui("Idle Talk"), command=lambda: active_trigger("idle"))
+    menu.add_command(label=get_message_ui("Go Left"), command=lambda: set_status("walk_left_lock"))
+    menu.add_command(label=get_message_ui("Go Right"), command=lambda: set_status("walk_right_lock"))
+    menu.add_command(label=get_message_ui("Sit"), command=lambda: set_status("sit_lock"))
     menu.add_separator()  # 구분선 추가
     # if is_talk_thread_activated:
     #     menu.add_command(label="Deactivate Speech Recognition", command=lambda: deactivate_speech_recognition())
     # else:
     #     menu.add_command(label="Activate Speech Recognition", command=lambda: activate_speech_recognition())
-    menu.add_command(label="Activate TikiTaka", command=lambda: active_tikitaka())
+    menu.add_command(label=get_message_ui("Activate TikiTaka"), command=lambda: active_tikitaka())
     # 스크린샷 기능 추가
     menu.add_separator()  
     screenshotApp = ScreenshotApp(root, menu)
-    menu.add_command(label="Activate Focus", command=lambda: active_focus())
+    menu.add_command(label=get_message_ui("Activate Focus"), command=lambda: active_focus())
     menu.add_separator()  
-    menu.add_command(label="Load models", command=lambda: load_models())
-    menu.add_command(label="Clean models", command=lambda: clean_models())
+    menu.add_command(label=get_message_ui("Load models"), command=lambda: load_models())
+    menu.add_command(label=get_message_ui("Clean models"), command=lambda: clean_models())
     # menu.add_separator()  
     # menu.add_command(label="S.Balloon", command=lambda: show_status_balloon(image_folder='./assets/fx/loading2'))
     # menu.add_command(label="K.Balloon", command=kill_status_balloon)
     menu.add_separator()  
-    menu.add_command(label="History", command=lambda: history.open_history_screen(root))
+    menu.add_command(label=get_message_ui("History"), command=lambda: history.open_history_screen(root))
     # menu.add_command(label="History", command=lambda: show_update_message())
-    menu.add_command(label="Clear Conversation", command=memory.reset_conversation_memory)
+    menu.add_command(label=get_message_ui("Clear Conversation"), command=memory.reset_conversation_memory)
     # menu.add_separator()  
     # menu.add_command(label="Version", command=open_versions)
 
     # 종료    
     menu.add_separator()  
-    menu.add_command(label="Exit", command=lambda: root.destroy())
+    menu.add_command(label=get_message_ui("Exit"), command=lambda: root.destroy())
     
     # 마우스 버튼 클릭 및 이동 이벤트
     root.bind("<Button-1>", on_click_async)
