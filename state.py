@@ -10,6 +10,7 @@ is_screenshot_area_selecting = False  # 현재 스크린샷 범위 설정 중
 use_gpu_percent = 0 
 
 g_language = 'en'  # 언어 : ["日本語", "English", "한국어"] to ['ja', 'en', 'ko']
+g_language_init = ''  # 최초 프로그램 기동시의 언어
 
 def get_is_stop_requested():
     global is_stop_requested
@@ -42,6 +43,24 @@ def get_g_language():
     except:
         pass
     return g_language
+
+# 최초 로딩시 언어 세팅 후 그 언어만 사용 / 메뉴용
+def get_g_language_init():
+    global g_language_init
+    if not g_language_init:
+        g_language_init = 'en'  # ["日本語", "English", "한국어"]
+        try:
+            with open('config/setting.json', 'r', encoding='utf-8') as file:
+                settings = json.load(file)
+                if 'setting_language' in settings:
+                    if settings['setting_language'] == '한국어':
+                        g_language_init = 'ko'
+                    elif settings['setting_language'] == '日本語':
+                        g_language_init = 'ja'
+        except:
+            pass
+    return g_language_init
+
 
 def get_use_gpu_percent():
     global use_gpu_percent
