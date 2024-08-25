@@ -100,7 +100,7 @@ class FasterWhisperListener:
                 prompt = ai_conversation.get_LLAMA3_prompt(detected_text)
                 
                 # prompt = prompt.replace("{player}", self.player)
-                # prompt = prompt.replace("{character}", self.character)
+                # prompt = prompt.replace("{char}", self.character)
 
                 data = {
                     "stream": True,
