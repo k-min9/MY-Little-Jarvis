@@ -1,4 +1,6 @@
-# MY Little JARVIS
+# 👩‍💻 MY Little JARVIS - 나만의 작은 AI 비서
+
+![title](docs_image/title.png)
 
 ## 개요
 
