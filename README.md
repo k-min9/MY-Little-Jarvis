@@ -40,7 +40,9 @@ pip install langchain-community
 pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
 pip install llama-cpp-python --prefer-binary --extra-index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/AVX2/cu116
 pip install pynvml  # GPU 
+pip install transformers==4.41.0
 ## 음성인식
+pip install sounddevice
 pip install faster-whisper
 pip install SpeechRecognition  # init에 faster-whisper을 위한 함수 개조 있음
 ## 음성합성(VITS)
@@ -58,3 +60,16 @@ pip install einops timm  # florence
 - 외부 파일
   - kss_korean_ISTFT.pth
   - Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf
+
+## 배포
+
+- 패키징
+
+``` bash
+pyinstaller --onedir main.py -n jarvis --noconsole --contents-directory=files --noconfirm --icon=./assets/ico/icon_arona.ico
+```
+
+- 업로드
+
+- 다운로드
+https://huggingface.co/mingu4969/my-little-jarvis-dist/resolve/main/Install.exe
