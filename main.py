@@ -984,6 +984,7 @@ class AnswerBalloon(tk.Toplevel):
     @classmethod
     def set_images(cls):
         cls.img_output = Image.open('./assets/png/output2.png') 
+        cls.img_output_light = Image.open('./assets/png/output2_light.png') 
         cls.close_img = ImageTk.PhotoImage(Image.open("./assets/png/close.png").resize((20, 20)))
         
         cls.answer_balloon_stop_img = ImageTk.PhotoImage(Image.open("./assets/png/stop.png").resize((20, 20)))
@@ -1003,6 +1004,7 @@ class AnswerBalloon(tk.Toplevel):
         
         self.faster_whisper_listener = faster_whisper_listener
         
+        self.is_answering = True
         self.setting_lang = answer['setting_lang']
         self.answer_en = answer['answer_en']
         self.answer_ko = answer['answer_ko']
@@ -1090,7 +1092,10 @@ class AnswerBalloon(tk.Toplevel):
         self.geometry(f"{self.canvas_width}x{self.canvas_height}+{self.root.winfo_x()}+{self.root.winfo_y() - self.canvas_height - 30}")
 
     def create_image(self):
-        img_output_resized = AnswerBalloon.img_output.resize((self.canvas_width, self.canvas_height))
+        if self.is_answering:
+            img_output_resized = AnswerBalloon.img_output_light.resize((self.canvas_width, self.canvas_height))
+        else:
+            img_output_resized = AnswerBalloon.img_output.resize((self.canvas_width, self.canvas_height))
         self.photo = ImageTk.PhotoImage(img_output_resized)
         self.canvas_image = self.canvas.create_image(self.canvas_width // 2, 0, anchor='n', image=self.photo)
         self.canvas.itemconfig(self.canvas_image, image=self.photo)
@@ -1125,27 +1130,34 @@ class AnswerBalloon(tk.Toplevel):
         self.create_image()
         self.reloc_btns()
         
-    def modify_text_from_answer(self, modified_answer):
-        print('why', self.setting_lang)
-        # 변수정리
-        self.answer['answer_en'] = modified_answer['answer_en']
-        self.answer['answer_ko'] = modified_answer['answer_ko']
-        self.answer['answer_jp'] = modified_answer['answer_jp']
-        self.answer_en = modified_answer['answer_en']
-        self.answer_ko = modified_answer['answer_ko']
-        self.answer_jp = modified_answer['answer_jp']
+    def modify_text_from_answer(self, modified_answer):  
+        try: # 작업중 창이 강제종료되는 등의 일이 일어날 수 있음
+            self.answer['answer_en'] = modified_answer['answer_en']
+            self.answer['answer_ko'] = modified_answer['answer_ko']
+            self.answer['answer_jp'] = modified_answer['answer_jp']
+            self.answer_en = modified_answer['answer_en']
+            self.answer_ko = modified_answer['answer_ko']
+            self.answer_jp = modified_answer['answer_jp']
+            
+            self.text = self.answer_en
+            if self.setting_lang == 'jp':
+                self.text = self.answer_jp
+            elif self.setting_lang == 'ko':
+                self.text = self.answer_ko
+            
+            self.canvas.delete(self.text_label)
+            self.canvas.delete(self.canvas_image)
+            self.create_text(self.text)
+            self.create_image()
+            self.reloc_btns()
+        except:
+            pass
+      
+    # 답변 종료 후, 말풍선 변경 및 버튼활성화/비활성화
+    def modify_end(self):
+        self.is_answering = False
         
-        self.text = self.answer_en
-        if self.setting_lang == 'jp':
-            self.text = self.answer_jp
-        elif self.setting_lang == 'ko':
-            self.text = self.answer_ko
-        
-        self.canvas.delete(self.text_label)
-        self.canvas.delete(self.canvas_image)
-        self.create_text(self.text)
         self.create_image()
-        self.reloc_btns()
        
     # text 변화를 확인하고 update
     def check_update(self):      
@@ -4016,11 +4028,16 @@ def regenerate(question):
                         answer['answer_ko'] = answer['answer_ko'] + ' ' + result_ko.lstrip()
                         answer['answer_jp'] = answer['answer_jp'] + '' + result_jp.lstrip()
                             
-                        # 말풍선 갱신                                                           
-                        answer_balloon.modify_text_from_answer(answer)
+                        # 말풍선 갱신    
+                        if answer_balloon:                                                      
+                            answer_balloon.modify_text_from_answer(answer)
                     # tkinter 창 업데이트
                     answer_balloon.update_idletasks()
                     answer_balloon.update()
+            else:
+                if answer_balloon: 
+                    answer_balloon.modify_end()  # 말풍선 갱신 종료
+                    
             answer_text = answer['answer_en']
             if loaded_settings['setting_chat_language'] == '日本語':
                 answer_text = answer['answer_jp']
@@ -4078,11 +4095,16 @@ def regenerate(question):
                     answer['answer_ko'] = answer['answer_ko'] + ' ' + result_ko.lstrip()
                     answer['answer_jp'] = answer['answer_jp'] + '' + result_jp.lstrip()
                         
-                    # 말풍선 갱신                                                           
-                    answer_balloon.modify_text_from_answer(answer)
+                    # 말풍선 갱신    
+                    if answer_balloon:                                                      
+                       answer_balloon.modify_text_from_answer(answer)
                 # tkinter 창 업데이트
                 answer_balloon.update_idletasks()
                 answer_balloon.update()
+        else:
+            if answer_balloon: 
+                answer_balloon.modify_end()  # 말풍선 갱신 종료
+                
         answer_text = answer['answer_en']
         if loaded_settings['setting_chat_language'] == '日本語':
             answer_text = answer['answer_jp']
@@ -4157,11 +4179,15 @@ def conversation_web(trans_question):
                 answer['answer_ko'] = answer['answer_ko'] + ' ' + result_ko.lstrip()
                 answer['answer_jp'] = answer['answer_jp'] + '' + result_jp.lstrip()
                     
-                # 말풍선 갱신                                                           
-                answer_balloon.modify_text_from_answer(answer)
+                # 말풍선 갱신    
+                if answer_balloon:                                                      
+                    answer_balloon.modify_text_from_answer(answer)
             # tkinter 창 업데이트
             answer_balloon.update_idletasks()
             answer_balloon.update()
+    else:
+        if answer_balloon: 
+            answer_balloon.modify_end()  # 말풍선 갱신 종료
     
     return answer['answer_en'], answer['answer_jp'], answer['answer_ko']
 
@@ -4248,11 +4274,16 @@ def conversation(user_input):
                     answer['answer_ko'] = answer['answer_ko'] + ' ' + result_ko.lstrip()
                     answer['answer_jp'] = answer['answer_jp'] + '' + result_jp.lstrip()
                         
-                    # 말풍선 갱신                                                           
-                    answer_balloon.modify_text_from_answer(answer)
+                    # 말풍선 갱신    
+                    if answer_balloon:                                                      
+                       answer_balloon.modify_text_from_answer(answer)
                 # tkinter 창 업데이트
                 answer_balloon.update_idletasks()
                 answer_balloon.update()
+        else:
+            if answer_balloon: 
+                answer_balloon.modify_end()  # 말풍선 갱신 종료
+                
         answer_text = answer['answer_en']
         if loaded_settings['setting_chat_language'] == '日本語':
             answer_text = answer['answer_jp']
@@ -4358,11 +4389,15 @@ def conversation(user_input):
                 answer['answer_ko'] = answer['answer_ko'] + ' ' + result_ko.lstrip()
                 answer['answer_jp'] = answer['answer_jp'] + '' + result_jp.lstrip()
                     
-                # 말풍선 갱신                                                           
-                answer_balloon.modify_text_from_answer(answer)
+                # 말풍선 갱신    
+                if answer_balloon:                                                      
+                    answer_balloon.modify_text_from_answer(answer)
             # tkinter 창 업데이트
             answer_balloon.update_idletasks()
             answer_balloon.update()
+    else:
+        if answer_balloon: 
+            answer_balloon.modify_end()  # 말풍선 갱신 종료
     answer_text = answer['answer_en']
     if loaded_settings['setting_chat_language'] == '日本語':
         answer_text = answer['answer_jp']
@@ -4435,11 +4470,16 @@ def active_trigger(trigger='idle'):
                 answer['answer_ko'] = answer['answer_ko'] + ' ' + result_ko.lstrip()
                 answer['answer_jp'] = answer['answer_jp'] + '' + result_jp.lstrip()
                     
-                # 말풍선 갱신                                                           
-                answer_balloon.modify_text_from_answer(answer)
+                # 말풍선 갱신    
+                if answer_balloon:                                                      
+                    answer_balloon.modify_text_from_answer(answer)
             # tkinter 창 업데이트
             answer_balloon.update_idletasks()
             answer_balloon.update()
+    else:
+        if answer_balloon: 
+            answer_balloon.modify_end()  # 말풍선 갱신 종료
+            
     answer_text = answer['answer_en']
     if loaded_settings['setting_chat_language'] == '日本語':
         answer_text = answer['answer_jp']
