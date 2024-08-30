@@ -1,5 +1,24 @@
 import requests
 import json
+import subprocess
+import os
+
+def start_server_python():
+    # 서버를 백그라운드에서 실행
+    return subprocess.Popen(
+        ['python', 'server_interface.py'], 
+        creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+    )
+    
+def start_server():
+    # 실행 파일 경로
+    executable_path = './server_interface.exe'  # TODO serverfile naming needed
+    
+    # 서버를 백그라운드에서 실행
+    return subprocess.Popen(
+        [executable_path],
+        creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+    )
 
 def check_server_health(url):
     try:
