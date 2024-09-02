@@ -1,13 +1,16 @@
 import json
 import state
+import pygame
 
 # Local
 # from ai_singleton import check_llm, get_llm  # main
 # from ai_singleton import get_vision_model, get_vision_processor  # image
 import ai_conversation
+import inference_ko
+
 
 # Server-Flask
-from flask import Flask, Response, request, jsonify
+from flask import Flask, Response, request, jsonify, send_file
 app = Flask(__name__)
 
 # llm = None
@@ -36,7 +39,17 @@ def main_stream():  # main logic
 def health():
     return jsonify({"status": "healthy"}), 200
 
+# 한국어 텍스트를 입력받아 변환
+@app.route('/getSound/ko/')
+@app.route('/getSound/ko/<text>')
+def synthesize_ko(text=None):
+    if text is None:
+        text = '안녕하세요!'
+    inference_ko.get_audio_file('korean', text)  # 동기적으로 ./output.wav 생성
+    return send_file('./output.wav', mimetype="audio/wav")
+
 if __name__ == '__main__':
+    pygame.mixer.init()
     # llm = load_model()
     # vision_model = get_vision_model()
     # vision_processor = get_vision_processor()
