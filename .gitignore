@@ -18,6 +18,7 @@
 *.spec
 *.log
 
+output.wav
 temp.py
 temp1.py
 temp2.py
