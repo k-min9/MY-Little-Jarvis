@@ -44,6 +44,7 @@ class FasterWhisperListener:
         
         # self.model = WhisperModel("base", device="cpu", download_root='./model_whisper')
         self.model = WhisperModel("small", device="cpu", download_root='./model')
+        # self.model = WhisperModel("large-v3", device="cuda", download_root='./model')
         self._vad_model = vad.VAD(model_path="./model/silero_vad.onnx")
         
         self.root = root
