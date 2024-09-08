@@ -76,13 +76,14 @@ py -3.9 -m venv venv
 
 # 일반 library
 pip install pyinstaller
-pip install googletrans==3.1.0a0
+pip install googletrans==4.0.0-rc1
 pip install tkinterdnd2 # tkinter 보조로 drag and drop 등의 외부 입력 받음
 pip install pyaudio
 pip install keyboard
 pip install pygame
 pip install Unidecode
 pip install Flask
+pip install screeninfo
 
 # websearch 관련
 pip install sentence-transformers
