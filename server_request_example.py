@@ -48,6 +48,7 @@ if __name__ == '__main__':
     # start_server_python()
     # start_server()
     
+    # from time import time
     # health_url = 'http://127.0.0.1:5000/health'
     # while not check_server_health(health_url):
     #     print("Waiting for server to be ready...")
@@ -56,7 +57,7 @@ if __name__ == '__main__':
     query = '내일 날씨가 어떨까?'
     image = ''
     
-    stream_url = 'http://127.0.0.1:5000/conversation_stream'
+    stream_url = 'http://127.0.0.1:5000/conversation_stream/simple'
     request_data = {'query': query}
     print(query)
     fetch_streaming_data(stream_url, request_data)
