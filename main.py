@@ -3328,17 +3328,17 @@ def open_settings(e=None):
     size_slider.grid(row=0, column=1, padx=10, sticky="w")
     size_slider.bind("<ButtonRelease-1>", update_size)  # 슬라이더에서 손 땠을때 이벤트 동작하게
     
-    def update_size_effecter(value):
-        loaded_settings['setting_size_effecter'] = float(size_effecter_slider.get())
-        # if size_effecter_slider.get() <= 0:  # show Value False하고 label 일일히 update 칠거면 이걸로
-        #     size_effecter_slider.config(label='None')
-        save_settings()
-    size_effecter_label = tk.Label(frame_size, text="Effecter", width=6)
-    size_effecter_label.grid(row=0, column=2, padx=10, sticky="w")
-    size_effecter_slider = Scale(frame_size, from_=0, to=1, resolution=0.1, orient=tk.HORIZONTAL) #, command=update_size)
-    size_effecter_slider.set(loaded_settings['setting_size_effecter'])  
-    size_effecter_slider.grid(row=0, column=3, padx=10, sticky="w")
-    size_effecter_slider.bind("<ButtonRelease-1>", update_size_effecter)  # 슬라이더에서 손 땠을때 이벤트 동작하게
+    # def update_size_effecter(value):
+    #     loaded_settings['setting_size_effecter'] = float(size_effecter_slider.get())
+    #     # if size_effecter_slider.get() <= 0:  # show Value False하고 label 일일히 update 칠거면 이걸로
+    #     #     size_effecter_slider.config(label='None')
+    #     save_settings()
+    # size_effecter_label = tk.Label(frame_size, text="Effecter", width=6)
+    # size_effecter_label.grid(row=0, column=2, padx=10, sticky="w")
+    # size_effecter_slider = Scale(frame_size, from_=0, to=1, resolution=0.1, orient=tk.HORIZONTAL) #, command=update_size)
+    # size_effecter_slider.set(loaded_settings['setting_size_effecter'])  
+    # size_effecter_slider.grid(row=0, column=3, padx=10, sticky="w")
+    # size_effecter_slider.bind("<ButtonRelease-1>", update_size_effecter)  # 슬라이더에서 손 땠을때 이벤트 동작하게
 
     # Frame : Action > Gravity, Mobility, Speed > Label, desc
     frame_physics = tk.Frame(frame_action)
