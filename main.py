@@ -52,6 +52,7 @@ import ai_singleton
 from util_screenshot import ScreenshotApp
 from util_loader import save_settings
 from util_loader import load_settings, load_settings_eden
+from util_balloon import MessageBoxAskQuestion, MessageBoxShowInfo
 
 import googletrans # 번역 관련
 from proper_nouns import change_to_jp, change_to_ko  # 고유명사 번역
@@ -163,6 +164,7 @@ monitor_screen_width, monitor_screen_height = 1920, 1080  # 화면 가로 세로
 # chat window
 chat_window = None
 
+# char_info sample
 char_info = {
     "voice_model": "arona_m9dev",
     "voice_type": "multi",
@@ -1455,77 +1457,7 @@ class AskBalloon(tk.Toplevel):
         global is_chatting
         is_chatting=True
         conversation_web(self.trans_question)
-        
-# 질문 상자
-class MessageBoxAskQuestion(tk.Toplevel):
-    def __init__(self, parent, title, message):
-        super().__init__(parent)
-        
-        # 번역
-        title = get_message(title)
-        message = get_message(message)
-            
-        global loading_message_box
-        if loading_message_box:
-            loading_message_box.destroy()
-        loading_message_box = self
-        
-        self.title(title) 
-        self.geometry(f"300x100+{parent.winfo_x() + 100}+{parent.winfo_y() + 100}")
-        self.attributes("-topmost", 98)
-        self.result = None
 
-        label = tk.Label(self, text=message)
-        label.pack(padx=20, pady=10)
-
-        yes_button = tk.Button(self, text=get_message('Yes'), command=self.on_yes, width=12)
-        yes_button.pack(side="left", padx=30)
-
-        no_button = tk.Button(self, text=get_message("No"), command=self.on_no, width=12)
-        no_button.pack(side="right", padx=30)
-
-    def on_yes(self):
-        global loading_message_box
-        loading_message_box = None
-        self.result = True
-        self.destroy()
-
-    def on_no(self):
-        global loading_message_box
-        loading_message_box = None
-        self.result = False
-        self.destroy()
-
-# 안내 상자
-class MessageBoxShowInfo(tk.Toplevel):
-    def __init__(self, parent, title, message):
-        super().__init__(parent)
-        
-        # 번역
-        title = get_message(title)
-        message = get_message(message)
-        
-        self.title(title)
-        self.geometry(f"300x100+{parent.winfo_x() + 100}+{parent.winfo_y() + 100}")
-        self.attributes("-topmost", 100)
-         
-        global loading_message_box
-        if loading_message_box:
-            loading_message_box.destroy()
-        loading_message_box = self
-
-        label = tk.Label(self, text=message, width=999, wraplength=280)
-        label.pack(padx=10, pady=10)
-        new_height = label.winfo_reqheight() + 60
-        self.geometry(f"300x{new_height}")
-
-        ok_button = tk.Button(self, text="OK", command=self.on_ok, width=20)
-        ok_button.pack()
-
-    def on_ok(self):
-        global loading_message_box
-        loading_message_box = None
-        self.destroy()
 
 # 이펙터
 class Effecter(tk.Toplevel):
@@ -1649,8 +1581,8 @@ class StatusBalloon(tk.Toplevel):
        
 # tkinter animation 관련
 def get_animation_assets_info(anim_name):
-    global char_info
- 
+    global loaded_settings, loaded_settings_eden
+    char_info = loaded_settings_eden[loaded_settings['setting_char']]  # 길어서 생략
     animation_assets_name = char_info['animation_assets']
     if animation_assets_name not in char_info['animation_assets_info']:
         char_info['animation_assets_info'][animation_assets_name] = dict()
@@ -1683,7 +1615,9 @@ def get_animation_assets_info(anim_name):
 
 def get_idle_info():
     global root_idle_width, root_idle_height
-    dir = './animation/' + 'arona_imagine31_2' + '/idle'  # ./animation/(arona_png)/(idle_2)      
+    global loaded_settings, loaded_settings_eden
+    animation_assets_name = char_info['animation_assets']
+    dir = './animation/' + animation_assets_name + '/idle'  # ./animation/(arona_png)/(idle_2)          
     files = os.listdir(dir)
     png_files = [file for file in files if file.endswith('.png')]
     first_png_file = os.path.join(dir, png_files[0])
@@ -1708,7 +1642,8 @@ def set_size(rate):
     
 
 def init_anim():
-    global char_info
+    global loaded_settings, loaded_settings_eden
+    char_info = loaded_settings_eden[loaded_settings['setting_char']]  # 길어서 생략
     setting_size = loaded_settings['setting_size']
     animation_assets_name = char_info['animation_assets']
 
@@ -1981,6 +1916,7 @@ def on_drag_motion(event):
         y = root.winfo_y() + deltay
         root.geometry(f"+{x}+{y}")
         drag_cool()
+        set_status('pick')
 
 def on_drag_release(event):
     global is_dragging
@@ -2068,6 +2004,7 @@ def update(delta):
 def update_physics_move():
     global is_dragging, is_falling, FALL_SPEED, FALL_GSPEED, status
 
+    # TODO : pick 모션 관리 체크
     if not loaded_settings['setting_is_gravity'] and loaded_settings['setting_mobility'] == 0:  # 중력도 이동빈도도 없으면 return
         root.after(1000, update_physics_move)  # 1초마다 작동
         return
@@ -2234,6 +2171,7 @@ def update_physics_move():
     else: 
         FALL_GSPEED = 0      
         set_status('pick') 
+        print('###pickkkkkk')
     
     # 공유자원 침범의 냄새가 나는데...
     root.after(10, update_physics_move)  # 10밀리초마다 작동 (100프레임)
@@ -4430,10 +4368,97 @@ def open_versions(e=None):
 def show_update_message(e=None):
     MessageBoxShowInfo(root, "Info", "Under updating...")
 
+# eden에서 해당 캐릭터 정보중에 접근성 높은 것을 반환, 전역화
+def get_char_info_from_eden(char_name):
+    global loaded_settings, loaded_settings_eden
+    char_info = dict()
+    if char_name in loaded_settings_eden:
+        char_info = loaded_settings_eden[char_name]
+    if 'ai_type' not in char_info:
+        char_info['ai_type'] = 'Local'
+    if 'gpt_version' not in char_info:
+        char_info['gpt_version'] = 'gpt-3.5-turbo-1106'
+    if 'gpt_key' not in char_info:
+        char_info['gpt_key'] = ''
+    if 'gpt_prompt' not in char_info:
+        prompt_sample = ""
+        prompt_sample += "arona is a self-proclaimed high-performance AI.\n"
+        prompt_sample += "arona is an AI, but she can eat, drink and feel emotions.\n"
+        prompt_sample += "arona is the OS of the mysterious tablet 'Shiddim Chest' and serves as the system administrator.\n"
+        prompt_sample += "In 'Siddim Chest', there is a desolate classroom located in the midst of a watery expanse, and arona lives in it.\n"
+        prompt_sample += "arona accompanies {player} throughout their adventure in Kivotos as a guide.\n"
+        prompt_sample += "arona calls {player} teacher.\n"
+        prompt_sample += "\n"
+        prompt_sample += "arona has a child-like personality and is quite gullible, often falling for {player}'s jokes.\n"
+        prompt_sample += "arona thoroughly enjoys sweets, being quick to abandon a diet for the sake of sweets—or even breaking into tears from being denied them.\n"
+        prompt_sample += "When arona is asked about something don't know, arona honestly respond that arona don't know about it.\n"
+        prompt_sample += "arona has Super AI Functions. As a powerful AI, arona originally had authority over many functions in Kivotos. \n"
+        prompt_sample += "arona herself still has incredible power as an AI, able to fend off any hacking attempt.\n"
+        prompt_sample += "arona has the power to negate damage dealt to {player}, but this power has an energy limit.\n"
+        char_info['gpt_prompt'] = prompt_sample
+    if 'gpt_max_token' not in char_info:
+        char_info['gpt_max_token'] = 512
+    if 'gpt_temperature' not in char_info:
+        char_info['gpt_temperature'] = 0.2
+    if 'gpt_history' not in char_info:  # 과거 이력 최대 몇 줄 보낼지
+        char_info['gpt_history'] = 1
+    if 'gpt_web_search' not in char_info:
+        char_info['gpt_web_search'] = False         
+    if 'gpt_web_search_cnt' not in char_info: # 검색 내역 몇 건 보낼건지
+        char_info['gpt_web_search_cnt'] = 1        
+    if 'local_name' not in char_info:
+        char_info['local_name'] = 'arona'
+    if 'local_model' not in char_info:
+        char_info['local_model'] = ''
+    if 'local_prompt' not in char_info:
+        prompt_sample = ""
+        prompt_sample += "arona is a self-proclaimed high-performance AI.\n"
+        prompt_sample += "arona is an AI, but she can eat, drink and feel emotions.\n"
+        prompt_sample += "arona is the OS of the mysterious tablet 'Shiddim Chest' and serves as the system administrator.\n"
+        prompt_sample += "In 'Siddim Chest', there is a desolate classroom located in the midst of a watery expanse, and arona lives in it.\n"
+        prompt_sample += "arona accompanies {player} throughout their adventure in Kivotos as a guide.\n"
+        prompt_sample += "arona calls {player} teacher.\n"
+        prompt_sample += "\n"
+        prompt_sample += "arona has a child-like personality and is quite gullible, often falling for {player}'s jokes.\n"
+        prompt_sample += "arona thoroughly enjoys sweets, being quick to abandon a diet for the sake of sweets—or even breaking into tears from being denied them.\n"
+        prompt_sample += "When arona is asked about something don't know, arona honestly respond that arona don't know about it.\n"
+        prompt_sample += "arona has Super AI Functions. As a powerful AI, arona originally had authority over many functions in Kivotos. \n"
+        prompt_sample += "arona herself still has incredible power as an AI, able to fend off any hacking attempt.\n"
+        prompt_sample += "arona has the power to negate damage dealt to {player}, but this power has an energy limit.\n"
+        char_info['local_prompt'] = prompt_sample
+    if 'local_memory_len' not in char_info:
+        char_info['local_memory_len'] = 5  
+    if 'local_knowledge' not in char_info:
+        char_info['local_knowledge'] = list()  
+    if 'voice_model' not in char_info:
+        char_info['voice_model'] = ''         
+    if 'voice_type' not in char_info:  # multi, single
+        char_info['voice_type'] = 'single'         
+    if 'voice_sid' not in char_info: # multi일때 활용
+        char_info['voice_sid'] = 0
+    if 'voice_speed' not in char_info: # 기본값 사용이 base 
+        char_info['voice_speed'] = 0
+    if 'voice_volume' not in char_info:  # 기본값 사용이 base
+        char_info['voice_volume'] = 0
+    if 'animation_assets' not in char_info:  # idle이 있는 폴더 이름 가져오고 그중에 0번 
+        char_info['animation_assets'] = 'arona_imagine31_2'
+    if 'animation_assets_info' not in char_info: 
+        char_info['animation_assets_info'] = dict()  
+    
+    loaded_settings_eden[char_name] = char_info
+    return char_info
+
 if __name__ == "__main__":
     # 초기화
     is_program_ended = False
     loaded_settings = load_settings()  # 설정 세팅 로드
+    loaded_settings_eden = load_settings_eden() 
+    
+    # char_info로 char_main이 있으면 그거 사용. 없으면 지난번에 사용한 캐릭 사용
+    if loaded_settings_eden['char_main']:
+        loaded_settings['setting_char'] = loaded_settings_eden['char_main']
+        save_settings()
+    char_info = get_char_info_from_eden(loaded_settings['setting_char'])  # get_assets_info시 NPE 방지
     
     # 로딩옵션 정리
     loading_option_root = tk.Tk()
