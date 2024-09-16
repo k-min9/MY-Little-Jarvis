@@ -14,7 +14,6 @@ from copy import deepcopy
 
 # Local
 from messages import getMessage
-import knowledge
 
 # util
 from util_balloon import MessageBoxAskQuestion, MessageBoxShowInfo
