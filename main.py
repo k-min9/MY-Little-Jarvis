@@ -41,6 +41,7 @@ from inference_ko import synthesize_char
 from screeninfo import get_monitors
 import memory
 import history
+from eden import open_char_setting
 
 import state
 import ai_intent_reader
@@ -49,6 +50,9 @@ import ai_conversation
 import ai_singleton
 
 from util_screenshot import ScreenshotApp
+from util_loader import save_settings
+from util_loader import load_settings, load_settings_eden
+
 import googletrans # 번역 관련
 from proper_nouns import change_to_jp, change_to_ko  # 고유명사 번역
 
@@ -484,7 +488,7 @@ class LoadingOptionScreen:
             except:
                 pass
             
-        save_settings()
+        save_settings(loaded_settings)
 
     def open_custom_window(self):
         if self.custom_window and tk.Toplevel.winfo_exists(self.custom_window):
@@ -527,7 +531,7 @@ class LoadingOptionScreen:
             if self.sound_var.get():
                 self.checked_options.append('sound.R')
             loaded_settings['setting_load_option_customlist'] = self.checked_options
-            save_settings()               
+            save_settings(loaded_settings)
             self.custom_window.destroy()
 
         self.custom_window.protocol("WM_DELETE_WINDOW", on_custom_window_close)
@@ -2518,208 +2522,6 @@ def talk_listener_test():
 
 # 메뉴 / 설정 관련
 ######################################################################
-def save_settings():
-    global loaded_settings
-    # config 폴더가 없으면 생성
-    os.makedirs('config', exist_ok=True)  
-    # 설정을 JSON 형식으로 저장
-    with open('config/setting.json', 'w', encoding='utf-8') as file:
-        json.dump(loaded_settings, file, ensure_ascii=False, indent=4)
-    print('save settings in config/setting.json')
-
-import os
-import json
-import uuid
-
-# 저장된 설정을 불러오는 함수
-def load_settings():
-    # 최초언어 로딩 세팅
-    init_lang = ''
-    try:
-        with open('config/install.json', 'r', encoding='utf-8') as file:
-            settings_install = json.load(file)
-            init_lang = settings_install['language']
-    except:
-        pass       
-    
-    # 로딩 세팅
-    try:
-        with open('config/setting.json', 'r', encoding='utf-8') as file:
-            settings = json.load(file)
-            
-            # Installer에서 정한 이름 (변경시 그쪽도 갱신)
-            if 'version' not in settings:
-                settings['version'] = 1
-                print('load_settings: version error')
-            if 'version_name' not in settings:
-                settings['version_name'] = '1.0.0'
-                print('load_settings: version_name error')
-            # 로딩옵션
-            if 'setting_load_option' not in settings or settings['setting_load_option'] not in ["Fast", "Normal", "Custom"]:
-                settings['setting_load_option'] = "Normal"
-                print('load_settings: setting_load_option error')
-            if 'setting_program_type' not in settings or settings['setting_program_type'] not in ["CPU", "GPU"]:
-                settings['setting_program_type'] = "CPU"
-                print('load_settings: setting_program_type error')
-            if 'setting_load_option_customlist' not in settings:
-                settings['setting_load_option_customlist'] = ['conversation']                    
-            # Setting 원본         
-            if 'setting_language' not in settings or settings['setting_language'] not in ["日本語", "English", "한국어"]:
-                settings['setting_language'] = init_lang if init_lang else "한국어"
-                print('load_settings: setting_language error')
-            if 'setting_name' not in settings:
-                settings['setting_name'] = 'Sensei'
-            if 'setting_uid' not in settings:
-                settings['setting_uid'] = str(uuid.uuid4())
-            if 'setting_char' not in settings:
-                settings['setting_char'] = 'arona'
-                print('load_settings: setting_char error')
-            if 'setting_size' not in settings or not (0 < settings['setting_size'] <= 2):
-                settings['setting_size'] = 1
-                print('load_settings: setting_size error')
-            if 'setting_size_effecter' not in settings or not (0 <= settings['setting_size_effecter'] <= 1):
-                settings['setting_size_effecter'] = 0
-                print('load_settings: setting_size_effecter error')
-            if 'setting_chat_mode' not in settings or settings['setting_chat_mode'] not in ["OFF", "Click", "Key"]:
-                settings['setting_chat_mode'] = 'Click'
-                print('load_settings: setting_chat_mode error')
-            if 'setting_chat_key' not in settings:
-                settings['setting_chat_key'] = ''
-                print('load_settings: setting_chat_key error')
-            if 'setting_chat_language' not in settings or settings['setting_chat_language'] not in ["日本語", "English", "한국어"]:
-                settings['setting_chat_language'] = init_lang if init_lang else "한국어"
-                print('load_settings: setting_chat_language error')
-            if 'setting_chat_click_sensitivity' not in settings:
-                settings['setting_chat_click_sensitivity'] = 100
-                print('load_settings: setting_chat_click_sensitivity error')
-            if 'setting_voice_mode' not in settings or settings['setting_voice_mode'] not in ["OFF", "CPU", "GPU"]:
-                settings['setting_voice_mode'] = 'CPU'
-                print('load_settings: setting_voice_mode error')
-            if 'setting_volume' not in settings or not (0 <= settings['setting_volume'] <= 200):
-                settings['setting_volume'] = 75
-                print('load_settings: setting_volume error')
-            if 'setting_is_volume_on' not in settings:
-                settings['setting_is_volume_on'] = True
-                print('load_settings: setting_is_volume_on error')
-            if 'setting_is_gravity' not in settings:
-                settings['setting_is_gravity'] = False
-                print('load_settings: setting_is_gravity error')
-            if 'setting_mobility' not in settings or not (0 <= settings['setting_mobility'] <= 2):
-                settings['setting_mobility'] = 1
-                print('load_settings: setting_mobility error')
-            if 'setting_moving_speed' not in settings or not (0 <= settings['setting_moving_speed'] <= 1):
-                settings['setting_moving_speed'] = 0
-                print('load_settings: setting_moving_speed error')
-            if 'setting_collision' not in settings:
-                settings['setting_collision'] = 'Task bar'
-                print('load_settings: setting_collision error')
-            if 'setting_ai' not in settings or settings['setting_ai'] not in ["Inworld", "chatGPT", "bard"]:
-                settings['setting_ai'] = 'Inworld'
-                print('load_settings: setting_ai error')
-            if 'setting_translator' not in settings or settings['setting_translator'] not in ["Google", "DeepL"]:
-                settings['setting_translator'] = 'Google'
-                print('load_settings: setting_translator error')
-            if 'setting_talk_mode' not in settings or settings['setting_talk_mode'] not in ["OFF", "Auto", "Manual"]:
-                settings['setting_talk_mode'] = 'OFF'
-                print('load_settings: setting_talk_mode error')
-            if 'setting_talk_key' not in settings:
-                settings['setting_talk_key'] = ''
-                print('load_settings: setting_talk_key error')
-            if 'setting_talk_language' not in settings or settings['setting_talk_language'] not in ["日本語", "English", "한국어"]:
-                settings['setting_talk_language'] = init_lang if init_lang else "한국어"
-                print('load_settings: setting_talk_language error')
-            if 'setting_talk_quality' not in settings or settings['setting_talk_quality'] not in ["tiny", "base", "small", "medium"]:
-                settings['setting_talk_quality'] = 'base'
-                print('load_settings: setting_talk_quality error')
-            if 'setting_can_stop_chat' not in settings:
-                settings['setting_can_stop_chat'] = False
-                print('load_settings: setting_can_stop_chat error')
-            if 'setting_history_folder' not in settings:
-                settings['setting_history_folder'] = './history'
-                print('load_settings: setting_history_folder error')
-            # Eden쪽 세팅
-            if 'setting_language' not in settings or settings['setting_language'] not in ["日本語", "English", "한국어"]:
-                settings['setting_language'] = init_lang if init_lang else "한국어"
-                print('load_settings: setting_language error')
-            if 'setting_preload_voice' not in settings:
-                settings['setting_preload_voice'] = False
-                print('load_settings: setting_preload_voice error')
-            if 'setting_preload_sr' not in settings:
-                settings['setting_preload_sr'] = False
-                print('load_settings: setting_preload_sr error')
-            # deepL Key쪽 세팅
-            if 'setting_key_deepL' not in settings:
-                settings['setting_key_deepL'] = ''
-                print('load_settings: setting_key_deepL error') 
-            # AI쪽 세팅
-            if 'setting_ai_stream' not in settings:
-                settings['setting_ai_stream'] = 'on'
-                print('load_settings: setting_ai_stream error') 
-            if 'setting_ai_sr' not in settings:  # "send", "check", "TikiTaka"
-                settings['setting_ai_sr'] = 'send'
-                print('load_settings: setting_ai_sr error') 
-            if 'setting_ai_web' not in settings:
-                settings['setting_ai_web'] = 'off'
-                print('load_settings: setting_ai_web error') 
-            if 'setting_ai_story' not in settings:
-                settings['setting_ai_story'] = 'off'
-                print('load_settings: setting_ai_story error') 
-            if 'setting_ai_memory' not in settings:
-                settings['setting_ai_memory'] = 'off'
-                print('load_settings: setting_ai_memory error') 
-            # if 'setting_ai_image' not in settings:
-            #     settings['setting_ai_image'] = 'off'
-            #     print('load_settings: setting_ai_image error') 
-            return settings
-    except FileNotFoundError:
-        # 파일이 없을 경우 기본값 설정
-        settings = {
-            # Installer에서 정한 이름 (변경시 그쪽도 갱신)
-            "version": 1,
-            "version_name": '1.0.0',
-            # 로딩옵션
-            "setting_load_option" : "Normal",
-            "setting_load_option_customlist" : ['conversation'],      
-            "setting_program_type" : "CPU",
-            # Main 세팅
-            "setting_name": 'sensei',
-            "setting_uid": str(uuid.uuid4()),
-            "setting_char": 'arona',
-            "setting_size": 1,
-            "setting_size_effecter": 0,
-            "setting_chat_mode": "Click",
-            "setting_chat_key": "",
-            "setting_chat_language": init_lang if init_lang else "日本語",
-            "setting_chat_click_sensitivity": 100,
-            "setting_voice_mode": "CPU",
-            "setting_volume": 75,
-            "setting_is_volume_on": True,
-            "setting_is_gravity": False,
-            "setting_mobility": 1,
-            "setting_moving_speed": 0,
-            "setting_collision": 'Task bar',
-            "setting_ai": 'Inworld',
-            "setting_translator": 'Google',
-            "setting_talk_mode": 'OFF',
-            "setting_talk_key": '',
-            "setting_talk_language": init_lang if init_lang else "日本語",
-            "setting_talk_quality": 'base',
-            "setting_can_stop_chat": False,
-            "setting_history_folder": './history',
-            "setting_language": init_lang if init_lang else "日本語",
-            "setting_preload_voice": False,
-            "setting_preload_sr": False,
-            "setting_key_deepL": "",
-            # AI 관련 설정
-            "setting_ai_stream" : "on",
-            "setting_ai_sr" : "send",  # "send", "check". "TikiTaka"
-            "setting_ai_web" : "off",
-            "setting_ai_story" : "off",
-            "setting_ai_memory" : "off",
-            # "setting_ai_image" : "off",
-        }
-        return settings
-
 def get_message(text, is_special=False):
     global loaded_settings
     return getMessage(text, loaded_settings['setting_language'], is_special)
@@ -2744,11 +2546,11 @@ def open_settings(e=None):
     global settings_keyboard_hooks
     settings_keyboard_hooks = list()  # 세팅 중 키보드 이벤트들
     def on_closing():
-        global settings_keyboard_hooks
+        global settings_keyboard_hooks, loaded_settings
         for hook in settings_keyboard_hooks:
             keyboard.unhook(hook)
         settings_keyboard_hooks = list()
-        save_settings()
+        save_settings(loaded_settings)
         settings_window.destroy()
     settings_window.protocol("WM_DELETE_WINDOW", on_closing) 
 
@@ -2765,8 +2567,9 @@ def open_settings(e=None):
     HoverTip(name_label, "User name")
 
     def on_name_text_changed(event):
+        global loaded_settings
         loaded_settings['setting_name'] = name_text.get("1.0", "end-1c") 
-        save_settings()
+        save_settings(loaded_settings)
     name_text = tk.Text(frame_player, wrap="none", width=16, height=1)
     name_text.grid(row=0, column=1, padx=10, pady=2, sticky="e")
     name_text.insert("1.0", loaded_settings['setting_name'])
@@ -2790,8 +2593,9 @@ def open_settings(e=None):
     HoverTip(language_label, "Languages to use in UI/Settings")
 
     def update_language():
+        global loaded_settings
         loaded_settings['setting_language'] = language_var.get()
-        save_settings()
+        save_settings(loaded_settings)
         # 언어에 맞춰 세팅 초기화
         name_label.config(text=get_message("Name"))
         # talk_quality_download_btn.config(text=get_message("Download"))
@@ -2845,15 +2649,17 @@ def open_settings(e=None):
 
 
     def update_volume(value):
+        global loaded_settings
         loaded_settings['setting_volume'] = float(volume_slider.get())
-        save_settings()
+        save_settings(loaded_settings)
     def toggle_volume():
+        global loaded_settings
         loaded_settings['setting_is_volume_on'] = not loaded_settings['setting_is_volume_on']
         if loaded_settings['setting_is_volume_on']:
             volume_button.config(image=img_volume_on)
         else:
             volume_button.config(image=img_volume_off)
-        save_settings()
+        save_settings(loaded_settings)
 
     # img_volume_off = ImageTk.PhotoImage(Image.open('./assets/png/speaker_off.png').resize((15, 15)))
     # img_volume_on = ImageTk.PhotoImage(Image.open('./assets/png/speaker_on.png').resize((15, 15)))
@@ -2886,10 +2692,11 @@ def open_settings(e=None):
     chat_label.grid(row=0, column=0, padx=5, pady=(0,35), sticky="w")
 
     def update_chat_mode():
+        global loaded_settings
         global is_chat_key_thread_activated, chat_key_thread  
         global settings_keyboard_hooks
         loaded_settings['setting_chat_mode'] = chat_mode_var.get()
-        save_settings()
+        save_settings(loaded_settings)
         if chat_mode_var.get() == "OFF":
             chat_key_entry.config(state=tk.DISABLED)
             # talk_key_entry.config(state=tk.DISABLED)
@@ -2918,6 +2725,7 @@ def open_settings(e=None):
             chat_key_thread.join()
         
     def update_chat_key(event):
+        global loaded_settings
         global is_chat_key_thread_activated, chat_key_thread  
         global settings_keyboard_hooks  
         chat_key_old = chat_key_var.get()  # 키 변경 실패시 돌릴 키
@@ -2933,7 +2741,7 @@ def open_settings(e=None):
         if event.name != loaded_settings['setting_chat_key']:
             chat_key_var.set(event.name)
             loaded_settings['setting_chat_key'] = chat_key_var.get()
-            save_settings()
+            save_settings(loaded_settings)
         else:
             chat_key_var.set(chat_key_old)
         # chat_key_thread 시작 (0.2초 후)
@@ -2965,8 +2773,9 @@ def open_settings(e=None):
     chat_key_entry.grid(row=0, column=4, padx=10, pady=2, sticky="we")
 
     def update_chat_language():
+        global loaded_settings
         loaded_settings['setting_chat_language'] = chat_language_var.get()
-        save_settings()
+        save_settings(loaded_settings)
     chat_language_var = tk.StringVar(value=loaded_settings['setting_chat_language'])
     for column_idx, chat_language in enumerate(["한국어", "English", "日本語"]):
         chat_language_frame = tk.Frame(frame_chat_desc_mode)
@@ -3317,8 +3126,9 @@ def open_settings(e=None):
     frame_size.grid(row=0, column=0, sticky="we")
     
     def update_size(value):
+        global loaded_settings
         loaded_settings['setting_size'] = float(size_slider.get())
-        save_settings()
+        save_settings(loaded_settings)
         set_size(loaded_settings['setting_size'])
         update_anim()
     size_label = tk.Label(frame_size, text="Size", width=6)
@@ -3345,9 +3155,10 @@ def open_settings(e=None):
     frame_physics.grid(row=1, column=0, sticky="we")
     
     def update_mobility(value):
+        global loaded_settings
         loaded_settings['setting_mobility'] = int(value)
         mobility_slider.config(label=mobility_dic[loaded_settings['setting_mobility']])
-        save_settings()
+        save_settings(loaded_settings)
     mobility_label = tk.Label(frame_physics, text="Mobility", width=6)
     mobility_label.grid(row=0, column=0, padx=10, sticky="w")
     mobility_dic = {
@@ -3361,9 +3172,10 @@ def open_settings(e=None):
     mobility_slider.grid(row=0, column=1, padx=10, sticky="w")
 
     def update_moving_speed(value):
+        global loaded_settings
         loaded_settings['setting_moving_speed'] = int(value)
         moving_speed_slider.config(label=moving_speed_dic[loaded_settings['setting_moving_speed']])
-        save_settings()       
+        save_settings(loaded_settings)  
     moving_speed_label = tk.Label(frame_physics, text="Speed", width=6)
     moving_speed_label.grid(row=0, column=2, padx=10, sticky="w")
     moving_speed_dic = {
@@ -3536,8 +3348,9 @@ def open_ai_settings():
     frame_row_idx = 0
     
     def update_setting(setting_key, value):
+        global loaded_settings
         loaded_settings[setting_key] = value
-        save_settings()
+        save_settings(loaded_settings)
         
     # Stream settings  # 기본 on
     # frame_stream = tk.Frame(ai_settings_window, padx=10)
@@ -4691,10 +4504,39 @@ if __name__ == "__main__":
     anim, anim_set = init_anim()
     set_status('idle')
     
-
+    def call_open_char_setting(root):
+        # callback
+        def callback_change_char_setting(result):
+            global loaded_settings, loaded_settings_eden
+            loaded_settings = load_settings()
+            loaded_settings_eden = load_settings_eden()
+            
+            # 캐릭터 변경
+            global anim, anim_set
+            loaded_settings['setting_char'] = result
+            anim, anim_set = init_anim()
+            if status != 'idle':
+                set_status('idle')
+            else:
+                set_status('smile')
+            
+            if setting_char_cur != result:                
+                # 캐릭터 변경시 이펙트 표시
+                effect_type = 'twinkle1'
+                size_width = int(root.winfo_width())
+                size_height = int(root.winfo_height())
+                image_paths = [os.path.join('assets/fx/'+effect_type, file) for file in os.listdir('assets/fx/'+effect_type) if file.endswith(".png")]
+                images = [ImageTk.PhotoImage(Image.open(image_path).resize((size_width, size_height))) for image_path in image_paths]
+                Effecter(images=images, duration=0.15)             
+            
+        # 창 열때의 캐릭터
+        setting_char_cur = loaded_settings['setting_char']
+        open_char_setting(root, callback_change_char_setting)
     
     # 우클릭 메뉴 생성
     menu = tk.Menu(root, tearoff=0)
+    menu.add_command(label=get_message_ui("Char Change"), command=lambda root=root: call_open_char_setting(root))
+    menu.add_separator()  
     menu.add_command(label=get_message_ui("Setting"), command=open_settings)
     menu.add_command(label=get_message_ui("AI Setting"), command=open_ai_settings)
     menu.add_separator()  
