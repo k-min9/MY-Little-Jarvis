@@ -194,7 +194,7 @@ def load_settings():
 # 프로그램에서 사용하는 캐릭터 설정(eden) 불러오기
 def load_settings_eden():
     try:
-        with open('config/install.json', 'rb') as file:
+        with open('config/eden.json', 'rb') as file:
             settings_eden = json.load(file)
             if 'version' not in settings_eden:
                 settings_eden['version'] = 1
