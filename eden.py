@@ -287,7 +287,7 @@ def open_char_setting(root_parent, callback):
         if 'voice_volume' not in char_info:  # 기본값 사용이 base
             char_info['voice_volume'] = 0
         if 'animation_assets' not in char_info:  # idle이 있는 폴더 이름 가져오고 그중에 0번 
-            char_info['animation_assets'] = ''
+            char_info['animation_assets'] = 'arona_imagine31_2'
         if 'animation_assets_info' not in char_info: 
             char_info['animation_assets_info'] = dict()  
         
@@ -1244,7 +1244,7 @@ def open_char_setting(root_parent, callback):
     arona_dict['animation_assets'] = 'arona_imagine31_2'
     loaded_settings_eden['arona'] = arona_dict
     mari_dict = get_char_info('mari')
-    mari_dict['animation_assets'] = 'mari'
+    mari_dict['animation_assets'] = 'arona_imagine31_2'
     loaded_settings_eden['mari'] = mari_dict
     
     def on_char_setting_window_close(callback):
