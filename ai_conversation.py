@@ -26,7 +26,7 @@ def init_module():
 
 def load_model(is_use_cuda=False):
     global llm
-    if not check_llm():
+    if check_llm():
         llm = get_llm()
     elif is_use_cuda:
         llm = get_llm()
