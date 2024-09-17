@@ -1,5 +1,5 @@
 # 개발 모드
-DEV_MODE = True
+DEV_MODE = False
 
 if not DEV_MODE or True:
     import logging  # PIL, hpack 등 logger 쓰는 라이브러리가 너무 날뜀
@@ -52,7 +52,7 @@ import ai_singleton
 from util_screenshot import ScreenshotApp
 from util_loader import save_settings
 from util_loader import load_settings, load_settings_eden
-from util_balloon import MessageBoxAskQuestion, MessageBoxShowInfo
+from util_ui import HoverTip, Effecter, MessageBoxAskQuestion, MessageBoxShowInfo
 
 import googletrans # 번역 관련
 from proper_nouns import change_to_jp, change_to_ko  # 고유명사 번역
@@ -587,7 +587,6 @@ class LoadingOptionScreen:
         self.save_option()
         self.master.destroy()
 
-
 # 로딩 스크린
 class LoadingScreen:
     def __init__(self, loading_root):
@@ -681,42 +680,6 @@ class LoadingScreen:
             self.loading_text_label.config(text=loading_screen_text)
             time.sleep(0.1)  # 0.1초마다 갱신
 
-# master위에 tip 메시지를 getMessages
-class HoverTip:
-    def __init__(self, widget, tip_message, **kwargs):
-        self.widget = widget
-        self.tip_message = tip_message
-        self.tip_window = None
-
-        self.widget.bind("<Enter>", self.show_tip)
-        self.widget.bind("<Leave>", self.hide_tip)
-        self.widget.bind("<Motion>", self.follow_mouse)
-
-    def show_tip(self, event):
-        if self.tip_window or not self.tip_message:
-            return
-
-        self.tip_window = tk.Toplevel(self.widget)
-        self.tip_window.wm_overrideredirect(True)
-        self.tip_window.attributes("-topmost", 1)
-
-
-        label = tk.Label(self.tip_window, text=get_message(self.tip_message), bg="yellow", justify='left')
-        label.pack()
-        
-        self.follow_mouse(event)
-
-    def follow_mouse(self, event):
-        if self.tip_window:
-            x = event.x_root + 10
-            y = event.y_root - 10
-            self.tip_window.geometry(f"+{x}+{y}")
-
-    def hide_tip(self, event):
-        if self.tip_window:
-            self.tip_window.destroy()
-            self.tip_window = None
-            
 # 음성인식확인 말풍선 (answer: dict)
 class SRBalloon(tk.Toplevel):
     def __init__(self, text, **kwargs):
@@ -1458,42 +1421,6 @@ class AskBalloon(tk.Toplevel):
         is_chatting=True
         conversation_web(self.trans_question)
 
-
-# 이펙터
-class Effecter(tk.Toplevel):
-    def __init__(self, images=None, duration=0.2, center=None, **kwargs):
-        super().__init__(**kwargs)
-        
-        self.attributes('-topmost', 99)
-        self.wm_attributes('-transparentcolor', '#f0f0f0')
-        self.overrideredirect(True)
-        
-        self.images = images
-        self.duration = duration
-        self.current_index = 0
-
-        self.label = tk.Label(self)
-        self.label.pack()
-
-        self.after(0, self.show_next_image)
-
-        self.center = center
-        if center:
-            self.geometry(f"+{center[0]}+{center[1]}")
-        else: # 없으면 root 중심으로 전개 (나중에 늘어나면 center, origin 추가.)
-            x = int(root.winfo_x())# + root.winfo_width()/2)
-            y = int(root.winfo_y())# + root.winfo_height()/2)
-            self.geometry(f"+{x}+{y}")
-
-    def show_next_image(self):
-        if self.current_index < len(self.images):
-            image = self.images[self.current_index]
-            self.label.configure(image=image)
-            self.current_index += 1
-            self.after(int(self.duration * 1000), self.show_next_image)
-        else:
-            self.destroy()
-
 # 로딩, 상태표시용 말풍선
 class StatusBalloon(tk.Toplevel):
     def __init__(self, image_folder=None, master=None, duration=120, **kwargs):
@@ -1574,8 +1501,6 @@ class StatusBalloon(tk.Toplevel):
         self.bg_image_file.close()
         status_balloon = None
         self.destroy()
-
-# 클래스 리퀘스트
 
 ######################################################################
        

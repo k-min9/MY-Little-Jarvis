@@ -6,7 +6,7 @@ import history_detail
 import os
 import googletrans
 
-from util_balloon import MessageBoxAskQuestion, MessageBoxShowInfo
+from util_ui import MessageBoxAskQuestion, MessageBoxShowInfo
 import state
 from messages import getMessage
 

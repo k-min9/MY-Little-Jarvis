@@ -5,7 +5,7 @@ import os
 import pickle
 import googletrans # 번역 관련
 
-from util_balloon import MessageBoxAskQuestion, MessageBoxShowInfo
+from util_ui import MessageBoxAskQuestion, MessageBoxShowInfo
 import state
 from messages import getMessage
 

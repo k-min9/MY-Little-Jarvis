@@ -16,7 +16,7 @@ from copy import deepcopy
 from messages import getMessage
 
 # util
-from util_balloon import MessageBoxAskQuestion, MessageBoxShowInfo
+from util_ui import MessageBoxAskQuestion, MessageBoxShowInfo
 from util_loader import save_settings, save_settings_eden
 from util_loader import load_settings, load_settings_eden
 

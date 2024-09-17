@@ -1,5 +1,8 @@
 import tkinter as tk
+from PIL import Image, ImageTk
+import threading
 
+import time
 from messages import getMessage
 from util_loader import load_settings
 
@@ -9,6 +12,77 @@ def get_message(text, is_special=False):
     loaded_settings = load_settings()
     
     return getMessage(text, loaded_settings['setting_language'], is_special)
+
+# master위에 tip 메시지를 getMessages
+class HoverTip:
+    def __init__(self, widget, tip_message, **kwargs):
+        self.widget = widget
+        self.tip_message = tip_message
+        self.tip_window = None
+
+        self.widget.bind("<Enter>", self.show_tip)
+        self.widget.bind("<Leave>", self.hide_tip)
+        self.widget.bind("<Motion>", self.follow_mouse)
+
+    def show_tip(self, event):
+        if self.tip_window or not self.tip_message:
+            return
+
+        self.tip_window = tk.Toplevel(self.widget)
+        self.tip_window.wm_overrideredirect(True)
+        self.tip_window.attributes("-topmost", 1)
+
+
+        label = tk.Label(self.tip_window, text=get_message(self.tip_message), bg="yellow", justify='left')
+        label.pack()
+        
+        self.follow_mouse(event)
+
+    def follow_mouse(self, event):
+        if self.tip_window:
+            x = event.x_root + 10
+            y = event.y_root - 10
+            self.tip_window.geometry(f"+{x}+{y}")
+
+    def hide_tip(self, event):
+        if self.tip_window:
+            self.tip_window.destroy()
+            self.tip_window = None
+
+# 이펙터
+class Effecter(tk.Toplevel):
+    def __init__(self, images=None, duration=0.2, center=None, **kwargs):
+        super().__init__(**kwargs)
+        
+        self.attributes('-topmost', 99)
+        self.wm_attributes('-transparentcolor', '#f0f0f0')
+        self.overrideredirect(True)
+        
+        self.images = images
+        self.duration = duration
+        self.current_index = 0
+
+        self.label = tk.Label(self)
+        self.label.pack()
+
+        self.after(0, self.show_next_image)
+
+        self.center = center
+        if center:
+            self.geometry(f"+{center[0]}+{center[1]}")
+        else: # 없으면 root 중심으로 전개 (나중에 늘어나면 center, origin 추가.)
+            x = int(root.winfo_x())# + root.winfo_width()/2)
+            y = int(root.winfo_y())# + root.winfo_height()/2)
+            self.geometry(f"+{x}+{y}")
+
+    def show_next_image(self):
+        if self.current_index < len(self.images):
+            image = self.images[self.current_index]
+            self.label.configure(image=image)
+            self.current_index += 1
+            self.after(int(self.duration * 1000), self.show_next_image)
+        else:
+            self.destroy()
 
 # 질문 상자
 class MessageBoxAskQuestion(tk.Toplevel):
@@ -81,18 +155,6 @@ class MessageBoxShowInfo(tk.Toplevel):
         loading_message_box = None
         self.destroy()
 
-def test_ask():
-    ask_question_box = MessageBoxAskQuestion(root, "Confirm", "YES / NO")
-    root.wait_window(ask_question_box)
-    if ask_question_box.result:   
-        print('yes')
-    else:
-        print('no')
-
-def test_show():
-    MessageBoxShowInfo(root, "Error", "key [ENTER] is not allowed.")
-
-
 if __name__ == "__main__":
     root = tk.Tk()
     
@@ -109,6 +171,17 @@ if __name__ == "__main__":
         menu.post(event.x_root, event.y_root)
         check_menu_visibility()
     
+    def test_ask():
+        ask_question_box = MessageBoxAskQuestion(root, "Confirm", "YES / NO")
+        root.wait_window(ask_question_box)
+        if ask_question_box.result:   
+            print('yes')
+        else:
+            print('no')
+
+    def test_show():
+        MessageBoxShowInfo(root, "Error", "key [ENTER] is not allowed.")
+
     menu = tk.Menu(root, tearoff=0)
     menu.add_command(label="Ask", command=test_ask)
     menu.add_command(label="Show", command=test_show)
