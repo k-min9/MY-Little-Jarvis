@@ -51,8 +51,10 @@ class HoverTip:
 
 # 이펙터
 class Effecter(tk.Toplevel):
-    def __init__(self, images=None, duration=0.2, center=None, **kwargs):
+    def __init__(self, root, images=None, duration=0.2, center=None, **kwargs):
         super().__init__(**kwargs)
+        
+        self.root = root
         
         self.attributes('-topmost', 99)
         self.wm_attributes('-transparentcolor', '#f0f0f0')
@@ -71,8 +73,8 @@ class Effecter(tk.Toplevel):
         if center:
             self.geometry(f"+{center[0]}+{center[1]}")
         else: # 없으면 root 중심으로 전개 (나중에 늘어나면 center, origin 추가.)
-            x = int(root.winfo_x())# + root.winfo_width()/2)
-            y = int(root.winfo_y())# + root.winfo_height()/2)
+            x = int(self.root.winfo_x())# + root.winfo_width()/2)
+            y = int(self.root.winfo_y())# + root.winfo_height()/2)
             self.geometry(f"+{x}+{y}")
 
     def show_next_image(self):
