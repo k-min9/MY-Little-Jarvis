@@ -1,3 +1,6 @@
+import os
+import json
+
 def arona_info_content():  # 2261
     content = """### Basic Infomation
 - Name : Arona, ARONA 
@@ -19,13 +22,38 @@ def arona_situation_00_content():
 """
     return content
 
-# 이미지나 web일 경우 그쪽 프롬프트 있겠네.
+def get_char_info_from_json(file_name):
+    file_path = './prompt/' + file_name + '.json'
+    # 파일의 존재 여부를 확인
+    if not os.path.exists(file_path):
+        return ''
+    
+    content = ''
+    with open(file_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+        
+        for title, content_dict in data.items():
+            content = content + '### ' + title + '\n'
+            for key, value in content_dict.items():
+                content = content + '- ' + key + ' : ' + value + '\n'
+            content = content + '\n'
+    content = content.rstrip()  # erase last \n
+    return content
 
+def get_all_filenames_in_prompt():
+    # prompt 폴더 경로
+    folder_path = "./prompt"
+    
+    # prompt 폴더 내 모든 파일 리스트 가져오기
+    all_files = os.listdir(folder_path)
+    
+    # 파일명에서 확장자 제거하고 파일명만 set으로 반환
+    file_names = {os.path.splitext(file)[0] for file in all_files}
+    
+    return file_names
 
-'''
-### Basic Information
-Name
-에어리온
-
-
-'''
+if __name__ == "__main__":
+    print(get_all_filenames_in_prompt())
+    
+    # print(get_char_info_from_json('arona'))
+    # print(get_char_info_from_json('mari'))
