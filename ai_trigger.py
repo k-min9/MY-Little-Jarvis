@@ -70,7 +70,7 @@ def generate_reply(*args, **kwargs):
 {system_prompt}<|eot_id|><|start_header_id|>user<|end_header_id|>
 {prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
 '''
-def get_LLAMA3_prompt(topic):
+def get_LLAMA3_prompt(topic, player_name=None, char_name=None):
     import prompt_main
     import memory
     from jinja2 import Template
@@ -92,7 +92,7 @@ Result: Teacher? What will you going to do this weekend?
 Topic: "Last night"
 Result: I had an amazing dream last night!"""
     messages.append({"role": "system", "content": content})
-    messages.extend(prompt_main.get_message_list_main())
+    messages.extend(prompt_main.get_message_list_main(char_name))
     # messages.extend(memory.get_memory_message_list(4096))  #  메모리 배제
 
     template = Template(LLAMA3_TEMPLATE)
@@ -117,7 +117,7 @@ def _generate_reply(query, player, character, is_sentence, is_regenerate, info_r
     global llm
     
     topic = get_random_topic(topics)
-    prompt = get_LLAMA3_prompt(topic)  # rag, web, memory(long) 미적용
+    prompt = get_LLAMA3_prompt(topic, character)  # rag, web, memory(long) 미적용
 
     all_stop_strings = ['\nYou:', '<|im_end|>', '<|im_start|>user', '<|im_start|>assistant\n', '\nAI:', "<|eot_id|>"]
     if is_sentence:

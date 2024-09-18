@@ -3662,7 +3662,7 @@ def regenerate(question):
             answer['answer_en'] = ''                 
             answer['answer_ko'] = ''
             answer['answer_jp'] = ''
-            for j, reply_list in enumerate(ai_conversation.process_stream(question, 'm9dev', 'Arona', True, False, info_img=file_path)):
+            for j, reply_list in enumerate(ai_conversation.process_stream(question, loaded_settings['setting_name'], loaded_settings['setting_char'], True, False, info_img=file_path)):
                 if last_reply_len < len(reply_list):
                     # 새로운 문장  
                     last_reply_len = len(reply_list)    
@@ -3729,7 +3729,7 @@ def regenerate(question):
         answer['answer_en'] = ''                 
         answer['answer_ko'] = ''
         answer['answer_jp'] = ''
-        for j, reply_list in enumerate(ai_conversation.process_stream(question, 'm9dev', 'Arona', True, True)):
+        for j, reply_list in enumerate(ai_conversation.process_stream(question, loaded_settings['setting_name'], loaded_settings['setting_char'], True, True)):
             if last_reply_len < len(reply_list):
                 # 새로운 문장  
                 last_reply_len = len(reply_list)    
@@ -3908,7 +3908,7 @@ def conversation(user_input):
         answer['answer_en'] = ''                 
         answer['answer_ko'] = ''
         answer['answer_jp'] = ''
-        for j, reply_list in enumerate(ai_conversation.process_stream(trans_question, 'm9dev', 'Arona', True, False, info_img=file_path)):
+        for j, reply_list in enumerate(ai_conversation.process_stream(trans_question, loaded_settings['setting_name'], loaded_settings['setting_char'], True, False, info_img=file_path)):
             if last_reply_len < len(reply_list):
                 # 새로운 문장  
                 last_reply_len = len(reply_list)    
@@ -4022,7 +4022,7 @@ def conversation(user_input):
     answer['answer_en'] = ''                 
     answer['answer_ko'] = ''
     answer['answer_jp'] = ''
-    for j, reply_list in enumerate(ai_conversation.process_stream(trans_question, 'm9dev', 'Arona', True, False)):
+    for j, reply_list in enumerate(ai_conversation.process_stream(trans_question, loaded_settings['setting_name'], loaded_settings['setting_char'], True, False)):
         # print('reply_list', reply_list)
         if last_reply_len < len(reply_list):
             # 새로운 문장  
@@ -4104,7 +4104,7 @@ def active_trigger(trigger='idle'):
     answer['answer_ko'] = ''
     answer['answer_jp'] = ''
     last_reply_len = 0
-    for j, reply_list in enumerate(ai_trigger.process_stream('idle', 'm9dev', 'Arona', True, True)):
+    for j, reply_list in enumerate(ai_trigger.process_stream('idle', loaded_settings['setting_name'], loaded_settings['setting_char'], True, True)):
         if last_reply_len < len(reply_list):
             # 새로운 문장  
             last_reply_len = len(reply_list)    
@@ -4382,7 +4382,7 @@ if __name__ == "__main__":
     # char_info로 char_main이 있으면 그거 사용. 없으면 지난번에 사용한 캐릭 사용
     if loaded_settings_eden['char_main']:
         loaded_settings['setting_char'] = loaded_settings_eden['char_main']
-        save_settings()
+        save_settings(loaded_settings)
     char_info = get_char_info_from_eden(loaded_settings['setting_char'])  # get_assets_info시 NPE 방지
     
     # 로딩옵션 정리
@@ -4477,7 +4477,7 @@ if __name__ == "__main__":
                 size_height = int(root.winfo_height())
                 image_paths = [os.path.join('assets/fx/'+effect_type, file) for file in os.listdir('assets/fx/'+effect_type) if file.endswith(".png")]
                 images = [ImageTk.PhotoImage(Image.open(image_path).resize((size_width, size_height))) for image_path in image_paths]
-                Effecter(images=images, duration=0.15)             
+                Effecter(root, images=images, duration=0.15)             
             
         # 창 열때의 캐릭터
         setting_char_cur = loaded_settings['setting_char']

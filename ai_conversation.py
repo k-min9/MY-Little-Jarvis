@@ -83,7 +83,7 @@ The conversation is only between {player} and {char}
 {system_prompt}<|eot_id|><|start_header_id|>user<|end_header_id|>
 {prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
 '''
-def get_LLAMA3_prompt(query, info_img=None):
+def get_LLAMA3_prompt(query, player_name=None, char_name=None, info_img=None):
     import prompt_main
     import memory
     from jinja2 import Template
@@ -92,7 +92,7 @@ def get_LLAMA3_prompt(query, info_img=None):
     LLM_STOP_SEQUENCE = "<|eot_id|>"
        
     messages = list() 
-    messages.extend(prompt_main.get_message_list_main())
+    messages.extend(prompt_main.get_message_list_main(char_name))
     messages.extend(memory.get_memory_message_list(4096))
     messages.append({"role": "user", "content": query})
 
@@ -377,7 +377,7 @@ def _generate_reply(query, player, character, is_sentence, is_regenerate, info_r
     if info_img:
         prompt = get_LLAMA_3_image_prompt(query, info_img)
     else:      
-        prompt = get_LLAMA3_prompt(query)  # rag, web, memory(long) 미적용
+        prompt = get_LLAMA3_prompt(query, player, character)  # rag, web, memory(long) 미적용
 
     all_stop_strings = ['\nYou:', '<|im_end|>', '<|im_start|>user', '<|im_start|>assistant\n', '\nAI:', "<|eot_id|>"]
     if is_sentence:
