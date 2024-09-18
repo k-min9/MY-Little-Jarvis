@@ -37,11 +37,13 @@ def main_stream_simple():  # main logic
 @app.route('/conversation_stream', methods=['POST'])
 def main_stream():  # main logic
     query = request.json.get('query')
+    player_name = request.json.get('player', 'sensei')  # player key가 없을대의 초기값 sensei
+    char_name = request.json.get('char', 'arona')  # player key가 없을대의 초기값 m9dev
     # image = ''  # TODO
     def generate():
         answer_list = list()
         reply_len = 0
-        for j, reply_list in enumerate(ai_conversation.process_stream(query, 'm9dev', 'arona', True, False)):
+        for j, reply_list in enumerate(ai_conversation.process_stream(query, player_name, char_name, True, False)):
             if reply_len < len(reply_list):
                 reply_len = len(reply_list)
                 
