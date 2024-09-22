@@ -93,8 +93,8 @@ def health():
 def synthesize_ko():
     text = request.json.get('text', '안녕하십니까.')
 
-    inference_ko.get_audio_file('korean', text)  # 동기적으로 ./output.wav 생성
-    return send_file('./output.wav', mimetype="audio/wav")
+    inference_ko.get_audio_file('korean', text)  # 동기적으로 output.wav 생성
+    return send_file('output.wav', mimetype="audio/wav")
 
 # 한국어 텍스트를 입력받아 변환 (Test용 GET, 문장중에 '/'가 있을 경우 고장)
 @app.route('/getSound/ko_test/')
@@ -103,7 +103,7 @@ def synthesize_ko_get(text=None):
     if text is None:
         text = '안녕하세요!'
     inference_ko.get_audio_file('korean', text)  # 동기적으로 ./output.wav 생성
-    return send_file('./output.wav', mimetype="audio/wav")
+    return send_file('output.wav', mimetype="audio/wav")
 
 if __name__ == '__main__':
     pygame.mixer.init()

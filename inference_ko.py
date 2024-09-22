@@ -89,6 +89,8 @@ def get_audio_file(actor, text, type='single', sid=0, use_cuda=False, n_speakers
             infer_g[actor] = load_multi_pth(infer_path[actor], use_cuda=use_cuda, n_speakers=n_speakers)
     audio = get_audio(actor, text, sid, type=type, use_cuda=use_cuda)
     write('./output.wav', hps.data.sampling_rate, audio)
+    if os.path.exists('./files/'):  # files에도 필요한 경우가 있음(API 전송용)
+        write('./files/output.wav', hps.data.sampling_rate, audio)    
     return 'fin'
 
         
