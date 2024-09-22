@@ -10,6 +10,8 @@ import traceback
 from threading import Thread, Lock
 import state as st
 
+import state
+
 from ai_singleton import check_llm, get_llm
 
 llm = None
@@ -338,9 +340,9 @@ def load_model(is_use_cuda=False):
     start_compressor()
     
     global llm
-    if check_llm():
+    if state.get_use_gpu_percent() != 0:  # gpu 사용여부 확인 (0이 아님)
         llm = get_llm()
-    elif is_use_cuda:
+    elif not check_llm() or is_use_cuda:  # 초기화 여부
         llm = get_llm()
     else:
         llm, tokenizer = LlamaCppModel.from_pretrained('./model/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf')

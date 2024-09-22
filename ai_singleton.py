@@ -403,8 +403,8 @@ def check_llm():
 def get_llm():
     llm = LlamaCppModel()
     if not llm.initialized:
-        # llm.from_pretrained('./model/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf')
-        llm.from_pretrained('./model/Qwen2.5-7B-Instruct-Q4_K_M.gguf')  # GPU 사용시 고장.
+        llm.from_pretrained('./model/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf')
+        # llm.from_pretrained('./model/Qwen2.5-7B-Instruct-Q4_K_M.gguf')  # GPU 사용시 고장.
         # llm.from_pretrained('./model/Qwen2.5-14B-Instruct-Q4_K_M.gguf')  # GPU 사용시 고장.
     return llm
 

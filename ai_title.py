@@ -5,6 +5,8 @@ import json
 import re
 from threading import Lock
 
+import state
+
 from ai_singleton import check_llm, get_llm
 
 llm = None
@@ -13,9 +15,9 @@ generation_lock = Lock()
 
 def load_model(is_use_cuda=True):  # 현재 CPU 오류 + history 등 외부 호출 고려
     global llm
-    if check_llm():
+    if state.get_use_gpu_percent() != 0:  # gpu 사용여부 확인 (0이 아님)
         llm = get_llm()
-    elif is_use_cuda:
+    elif not check_llm() or is_use_cuda:  # 초기화 여부
         llm = get_llm()
     else:
         from ai_llama_cpp_model import LlamaCppModel 
