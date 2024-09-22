@@ -28,3 +28,13 @@ temp4.py
 temp.json
 tempCodeRunnerFile.py
 snipet.py
+
+# Fork Example
+server_interface_jp.py
+inference_jp.py
+models_jp.py
+voice_management_jp.py
+/monotonic_align_jp
+/text_jp
+/voices_jp
+/dict
