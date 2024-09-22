@@ -1,3 +1,12 @@
+# 개발 모드
+DEV_MODE = True
+
+if not DEV_MODE or True:
+    import logging  # PIL, hpack 등 logger 쓰는 라이브러리가 너무 날뜀
+    logging.disable(logging.INFO) # disable INFO and DEBUG logging everywhere
+    logging.disable(logging.DEBUG) # disable INFO and DEBUG logging everywhere
+    logging.disable(logging.WARNING) # disable WARNING, INFO and DEBUG logging everywhere
+
 import json
 import state
 import pygame
@@ -40,11 +49,17 @@ def main_stream():  # main logic
     player_name = request.json.get('player', 'sensei')  # player key가 없을대의 초기값 sensei
     char_name = request.json.get('char', 'arona')  # player key가 없을대의 초기값 m9dev
     ai_language = request.json.get('ai_language', 'en')  #  추론 언어 : 영입영출, 한입한출, 일입일출 등등
+    
+    print('request.json', request.json)
+    
+    query_trans = translator_google.translate(query, dest='en').text
+    print('query_trans', request.json)
+    
     # image = ''  # TODO
     def generate():
         answer_list = list()
         reply_len = 0
-        for j, reply_list in enumerate(ai_conversation.process_stream(query, player_name, char_name, True, False)):
+        for j, reply_list in enumerate(ai_conversation.process_stream(query_trans, player_name, char_name, True, False)):
             if reply_len < len(reply_list):
                 reply_len = len(reply_list)
                 
