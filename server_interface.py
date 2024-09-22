@@ -39,6 +39,7 @@ def main_stream():  # main logic
     query = request.json.get('query')
     player_name = request.json.get('player', 'sensei')  # player key가 없을대의 초기값 sensei
     char_name = request.json.get('char', 'arona')  # player key가 없을대의 초기값 m9dev
+    ai_language = request.json.get('ai_language', 'en')  #  추론 언어 : 영입영출, 한입한출, 일입일출 등등
     # image = ''  # TODO
     def generate():
         answer_list = list()
@@ -73,23 +74,21 @@ def health():
     return jsonify({"status": "healthy"}), 200
 
 # 한국어 텍스트를 입력받아 변환
-@app.route('/getSound/ko/')
-@app.route('/getSound/ko/<text>')
-def synthesize_ko(text=None):
+@app.route('/getSound/ko', methods=['POST'])
+def synthesize_ko():
+    text = request.json.get('text', '안녕하십니까.')
+
+    inference_ko.get_audio_file('korean', text)  # 동기적으로 ./output.wav 생성
+    return send_file('./output.wav', mimetype="audio/wav")
+
+# 한국어 텍스트를 입력받아 변환 (Test용 GET, 문장중에 '/'가 있을 경우 고장)
+@app.route('/getSound/ko_test/')
+@app.route('/getSound/ko_test/<text>')
+def synthesize_ko_get(text=None):
     if text is None:
         text = '안녕하세요!'
     inference_ko.get_audio_file('korean', text)  # 동기적으로 ./output.wav 생성
     return send_file('./output.wav', mimetype="audio/wav")
-
-# # 일본어 텍스트를 입력받아 변환
-# @app.route('/getSound/jp/')
-# @app.route('/getSound/jp/<text>')
-# def synthesize_jp(text=None):
-#     if text is None:
-#         text = 'こんにちは'
-#         # text = "すみません…できればでいいのですが、わたしについできてください。"
-#     inference_jp.get_audio_file('arona', text)  # 동기적으로 ./output.wav 생성
-#     return send_file('./output.wav', mimetype="audio/wav")
 
 if __name__ == '__main__':
     pygame.mixer.init()
@@ -98,5 +97,10 @@ if __name__ == '__main__':
     # vision_processor = get_vision_processor()
     
     state.set_use_gpu_percent(8)  # GPU 100% 발동
+    
+    # preloading
+    inference_ko.get_audio_file('korean', '안녕하세요!')
+    for j, reply_list in enumerate(ai_conversation.process_stream('안녕?', 'sensei', 'arona', True, False)):
+        pass
     
     app.run(host='0.0.0.0', port=5000)
