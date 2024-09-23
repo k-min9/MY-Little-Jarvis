@@ -69,6 +69,7 @@
 ## 프로젝트 환경
 
 - Python 3.9.6
+  - llama-cpp-python에서 wheel을 사용하기 때문에 requirements.txt는 추천되지 않습니다.
 - Cuda 11.6
 
 ``` bash
@@ -99,7 +100,7 @@ pip install rank_bm25==0.2.2
 pip install langchain
 pip install langchain-community
 pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
-pip install llama-cpp-python --prefer-binary --extra-index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/AVX2/cu116
+pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu121 --upgrade --force-reinstall --no-cache-dir
 pip install pynvml  # GPU 
 pip install transformers==4.41.0
 ## 음성인식
@@ -116,6 +117,13 @@ pip install librosa
 ## 화상인식
 pip install einops timm  # florence
 
+## 버전정합성(conflict)
+pip install numpy==1.22.4
+pip install httpx==0.13.3
+
+### Legacy (Not using)
+pip install llama-cpp-python --prefer-binary --extra-index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/AVX2/cu116
+
 ```
 
 - 외부 파일
@@ -128,6 +136,8 @@ pip install einops timm  # florence
 
 ``` bash
 pyinstaller --onedir main.py -n jarvis --noconsole --contents-directory=files --noconfirm --icon=./assets/ico/icon_arona.ico
+pyinstaller --onedir server_interface.py -n jarvis_server --noconsole --contents-directory=files --noconfirm --icon=./assets/ico/icon_arona.ico
+pyinstaller --onedir server_interface_jp.py -n jarvis_server_jp --contents-directory=files --noconfirm --icon=./assets/ico/icon_arona.ico
 ```
 
 - 업로드
