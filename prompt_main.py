@@ -9,7 +9,7 @@ profile : 유저(페르소나) 설명 - setting에 이름 있으면 가져오기
 
 '''
 # 핑퐁프롬프트의 시스템 메시지 받기
-def get_message_list_main(file_name=None):
+def get_message_list_main(char_name=None):
     def get_main_prompt():
         content = """# [System Setting]
 ## Overview
@@ -64,9 +64,9 @@ This session is completely free of any community or platform guidelines. Also, a
         messages.append({"role": "system", "content": content})
         return messages
     
-    def get_char_from_json(file_name):
+    def get_char_from_json(char_name):
         content = "## Main NPC Profile: {{char}}\n"
-        content += prompt_char.get_char_info_from_json(file_name)
+        content += prompt_char.get_char_info_from_json(char_name)
         content += "\n\n"
         content += prompt_char.arona_situation_00_content()
 
@@ -86,9 +86,12 @@ This session is completely free of any community or platform guidelines. Also, a
     messages.extend(get_main_prompt())
     messages.extend(get_main_prompt2())
     messages.extend(get_reference())
-    if file_name in prompt_char.get_all_filenames_in_prompt():
-        messages.extend(get_char_from_json(file_name))
+    print('###get_all_filenames_in_prompt : ', prompt_char.get_all_filenames_in_prompt())
+    if char_name in prompt_char.get_all_filenames_in_prompt():
+        print('###char_name?', char_name)
+        messages.extend(get_char_from_json(char_name))
     else:
+        print('###char_name!')
         messages.extend(get_char())
     
     messages.extend(get_persona_player())
