@@ -7,6 +7,7 @@ if not DEV_MODE or True:
     logging.disable(logging.DEBUG) # disable INFO and DEBUG logging everywhere
     logging.disable(logging.WARNING) # disable WARNING, INFO and DEBUG logging everywhere
 
+import sys
 import json
 import state
 import pygame
@@ -105,13 +106,42 @@ def synthesize_ko_get(text=None):
     inference_ko.get_audio_file('korean', text)  # 동기적으로 ./output.wav 생성
     return send_file('output.wav', mimetype="audio/wav")
 
+def get_available_vram_gb_for_server():
+    from pynvml import nvmlInit, nvmlDeviceGetHandleByIndex, nvmlDeviceGetMemoryInfo, nvmlShutdown
+    max_vram = 8
+    try:
+        nvmlInit()
+        handle = nvmlDeviceGetHandleByIndex(0)  # 0번 GPU
+        info = nvmlDeviceGetMemoryInfo(handle)
+        available_vram_mb = info.free // 1024**3  # 바이트를 GB로 변환
+        nvmlShutdown()
+        return min(available_vram_mb-1, max_vram)  # 여유 vram 1GB 남기기
+    except Exception as e:
+        print(f"Failed to get VRAM info: {e}")
+        return 0  # 기본값 8GB, 예외 발생 시
+
 if __name__ == '__main__':
     pygame.mixer.init()
-    # llm = load_model()
-    # vision_model = get_vision_model()
-    # vision_processor = get_vision_processor()
+
+    # 첫번째 변수 = CPU or GPU
+    server_type = "GPU"
     
-    state.set_use_gpu_percent(8)  # GPU 100% 발동
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "CPU":
+            server_type = sys.argv[1]
+    if server_type == "GPU":
+        use_vram = get_available_vram_gb_for_server()
+        state.set_use_gpu_percent(use_vram)  # 8 = GPU 100%
+    else:
+        state.set_use_gpu_percent(0)
+    print(f"Init Option - Server Type: {server_type}, max_vram: {use_vram}")
+
+    # Second Param = ko, jp
+    voice_language = "ko"
+    if len(sys.argv) > 2:
+        if sys.argv[2] == "jp":
+            voice_language = sys.argv[2]
+    print(f"Init Option - Voice Language: {voice_language}")
     
     # preloading
     inference_ko.get_audio_file('korean', '안녕하세요!')
