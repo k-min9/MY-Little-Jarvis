@@ -586,10 +586,10 @@ Always use these translations for these terms, regardless of context. Do not alt
         else:
             content = content + get_system_content_to_en()
         # body Type2
-        if dest_lang == 'jp':
-            content = content + get_system_content_to_en_jp()
-        else:
-            content = content + get_system_content_to_en_ko()
+        # if dest_lang == 'jp':
+        #     content = content + get_system_content_to_en_jp()
+        # else:
+        #     content = content + get_system_content_to_en_ko()
         content = content + get_system_content_tail()
         messages.append({"role": "system", "content": content})
         return messages

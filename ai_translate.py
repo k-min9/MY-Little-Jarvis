@@ -31,8 +31,8 @@ def load_model(is_use_cuda=False):
     elif not check_llm() or is_use_cuda:  # 초기화 여부
         llm = get_llm()
     else:        
-        llm, tokenizer = LlamaCppModel.from_pretrained('./model/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf')
-    
+        # llm, tokenizer = LlamaCppModel.from_pretrained('./model/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf')
+        llm, tokenizer = LlamaCppModel.from_pretrained('./model/gemma-2-2b-jpn-it.Q4_K_M.gguf')
     
 def clean_model():
     global llm
@@ -103,7 +103,7 @@ def get_LLAMA3_prompt(query, dest_lang='en'):
                     add_generation_prompt=True,  # <|im_start|>assistant를 마지막에 붙이는거
     )
     
-    print('prompt',  prompt)
+    # print('prompt',  prompt)
     
     return prompt
     
@@ -167,7 +167,8 @@ class LlamaCppModel:
         tensor_split_list = None
 
         params = {
-            "model_path": "model\\Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf",  # 모델 파일 경로
+            # "model_path": "model\\Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf",  # 모델 파일 경로
+            "model_path": "model\\gemma-2-2b-jpn-it.Q4_K_M.gguf",  # 모델 파일 경로
             "n_ctx": 8192,  # 컨텍스트 길이 (최대 토큰 수)
             "n_threads": None,  # 모델 로딩 및 실행 시 사용할 스레드 수 (None이면 기본값 사용)
             "n_threads_batch": None,  # 배치 처리 시 사용할 스레드 수 (None이면 기본값 사용)
@@ -459,8 +460,8 @@ if __name__ == "__main__":
     # print(get_LLAMA3_prompt('hello?'))
     
     # 모델 로딩
-    # is_use_cuda=False
     is_use_cuda=True
+    # is_use_cuda=True
     load_model(is_use_cuda)
         
     # Stream 테스트
@@ -474,7 +475,7 @@ if __name__ == "__main__":
     
     dest_lang = 'en'
     dest_lang = 'jp'
-    dest_lang = 'ko'
+    # dest_lang = 'ko'
     
     result = ''
     last_reply_len = 0

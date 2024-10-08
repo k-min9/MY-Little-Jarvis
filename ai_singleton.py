@@ -37,6 +37,7 @@ class LlamaCppModel(metaclass=SingletonMeta):
 
         gpu_percent = state.get_use_gpu_percent()
         n_gpu_layers = int(LLM_LAYERS * gpu_percent / 100)
+        # n_gpu_layers = -1
 
         params = {
             "model_path": path,  # 모델 파일 경로
@@ -404,6 +405,9 @@ def get_llm():
     llm = LlamaCppModel()
     if not llm.initialized:
         llm.from_pretrained('./model/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf')
+        # llm.from_pretrained('./model/gemma-2-2b-jpn-it.Q4_K_M.gguf')
+        # llm.from_pretrained('./model/Qwen2-7B-Multilingual-RP.Q4_K_M.gguf')
+        # llm.from_pretrained('./model/EXAONE-3.0-7.8B-Instruct-Q5_K_L.gguf')
         # llm.from_pretrained('./model/Qwen2.5-7B-Instruct-Q4_K_M.gguf') 
         # llm.from_pretrained('./model/Qwen2.5-14B-Instruct-Q4_K_M.gguf') 
     return llm
