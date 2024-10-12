@@ -2,20 +2,25 @@
 
 ![title](docs_image/title.png)
 
-## Download : relase or <https://shorturl.at/QrFmp>
+## Installer Download : release or <https://shorturl.at/QrFmp>
 
-## 개요
-
-- 나만을 위한 그냥 좀 많이 똑똑한 시스템(Just A Rather Very Intelligent System)
-- 오픈소스 AI(로컬 LLM)으로 만든 나만의 작은 AI 비서
-- 명세
-  - 구동환경 : Windows
-  - 용량 : 13.2GB
+- Installer 명세
+  - 개요 : python 설치, version, venv, gmake, gpu 설정 등 복잡한 설정 없이 원클릭 Install 파일 지원
+  ![installer](docs_image/installer1.png)
   - 설치방법
     1. 위에서 Download하신 Installer.exe를 실행해주세요.
        - 실행한 프로그램 우측 하단의 Install을 클릭하시면 Installer.exe 위치에 바로 설치됩니다. (설치할 위치나 언어를 변경할 수 있습니다.)
     2. 설치가 완료되었다는 안내메시지가 뜨면 확인을 눌러 종료해주세요.
     3. Done! 설치된 폴더에 있는 Jarvis.exe를 실행해주세요.
+- 프로그램 명세
+  - 구동환경 : Windows
+  - 용량 : 13.2GB
+  - 지원언어 : 한국어/English/日本語
+
+## 개요
+
+- 나만을 위한 그냥 좀 많이 똑똑한 시스템(Just A Rather Very Intelligent System)
+- 오픈소스 AI(로컬 LLM)으로 만든 나만의 작은 AI 비서
 
 ## 배경
 
@@ -136,8 +141,8 @@ pip install llama-cpp-python --prefer-binary --extra-index-url=https://jllllll.g
 
 ``` bash
 pyinstaller --onedir main.py -n jarvis --noconsole --contents-directory=files --noconfirm --icon=./assets/ico/icon_arona.ico
-pyinstaller --onedir server_interface.py -n jarvis_server --noconsole --contents-directory=files --noconfirm --icon=./assets/ico/icon_arona.ico
-pyinstaller --onedir server_interface_jp.py -n jarvis_server_jp --contents-directory=files --noconfirm --icon=./assets/ico/icon_arona.ico
+pyinstaller --onedir server_interface.py -n jarvis_server --noconsole --contents-directory=files_server --noconfirm --icon=./assets/ico/icon_arona.ico
+pyinstaller --onedir server_interface_jp.py -n jarvis_server_jp --contents-directory=files_server --noconfirm --icon=./assets/ico/icon_arona.ico --noconsole 
 ```
 
 - 업로드
@@ -147,6 +152,6 @@ https://huggingface.co/mingu4969/my-little-jarvis-dist/resolve/main/Install.exe
 
 ## Special Thanks
 
-- 이번 프로젝트에서 사용한 [Nexon]의 [블루아카이브] IP에 관하여, 여러번에 걸친 연락과 문의 끝에 [문제가 있으면 조치한다]는 형태로 IP 사용을 수락 받았습니다.
+- 이번 프로젝트에서 사용한 [Nexon]의 [블루아카이브] IP에 관하여, 여러번에 걸친 연락과 문의 끝에 [문제가 있으면 조치한다]는 형태로 IP 사용을 수락 받았습니다. ([증적](docs/special_thanks_nexon.md))
 - 이 프로젝트는 원본 리소스, 음성, Asset등의 자산을 활용하지 않았고, [Nexon게임IP사용가이드](https://member.nexon.com/policy/gameipguide.aspx)를 준수하였습니다.
 - 이 자리를 빌어 감사의 말씀을 전합니다.
