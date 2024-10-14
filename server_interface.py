@@ -11,6 +11,8 @@ import sys
 import json
 import state
 import pygame
+import datetime
+
 
 # Local
 import ai_conversation
@@ -28,6 +30,18 @@ try:
     translator_google = googletrans.Translator()
 except:
     pass
+
+# 일본어 번역 API
+@app.route('/getJpTrans', methods=['GET'])
+def get_jp_trans():
+    text = request.args.get('text', default='', type=str)
+    if translator_google:
+        try:
+            translated_text = translator_google.translate(text, dest='ja').text
+            return jsonify({"translated_text": translated_text}), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+    return jsonify({"error": "Translator not available"}), 500
 
 # 번역없이 답변
 @app.route('/conversation_stream/simple', methods=['POST'])
@@ -122,6 +136,10 @@ def get_available_vram_gb_for_server():
 
 if __name__ == '__main__':
     pygame.mixer.init()
+    
+    # 로그 파일 설정
+    log_filename = f"server_log_{datetime.datetime.now().strftime('%Y%m%d')}.txt"
+    sys.stdout = open(log_filename, 'a')  # 표준 출력 리다이렉트
 
     # 첫번째 변수 = CPU or GPU
     server_type = "GPU"
