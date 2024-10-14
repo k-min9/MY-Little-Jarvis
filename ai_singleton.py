@@ -80,6 +80,7 @@ class LlamaCppModel(metaclass=SingletonMeta):
         gc.collect()
         prompt = kwargs.get('prompt')
         temperature = kwargs.get('temperature', 0)  # 기본값은 0
+        stop = kwargs.get('stop', [])  # 기본값 List
         
         prompt = prompt if type(prompt) is str else prompt.decode()
         prompt = self.encode(prompt)
@@ -92,6 +93,7 @@ class LlamaCppModel(metaclass=SingletonMeta):
             max_tokens=1024,
             prompt=prompt,
             temperature=temperature,
+            stop=stop
         )
         return output
 

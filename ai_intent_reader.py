@@ -61,16 +61,22 @@ web: False"""
 Question: "{question}"
 Result:"""
 
+    stop_keywords = ["<|eot_id|>", "question:", "Question:"]
     output = llm.create_completion(
         # max_tokens=128,  
         max_tokens=4096, # infinity
         # stop=["Q:", "\n"],
         # stop=[f"sensei:",f"sensei(","<|im_","user:", "#", ":"],
-        stop=["<|eot_id|>", "question:", "Question:"],
+        stop=stop_keywords,
         prompt=prompt,
         temperature=0
     )
     result = output['choices'][0]['text']
+    
+    # 단어있으면 최후의 체크
+    for stop_keyword in stop_keywords:
+        if stop_keyword in result:
+            result = result.split(stop_keyword)[0]
     
     # 문장체크
     
