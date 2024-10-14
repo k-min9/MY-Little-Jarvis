@@ -8,7 +8,7 @@
 
 - (주)Nexon과 2024년 7월 25일 ~ 2024년 8월 1일까지 총 네 번을 통한 질답 끝에,
 문제가 생기면 사후 조치하겠다는 형태로 IP 사용을 허가 받았습니다.
-- 개인정보등 민감한 개인 정보도 포함되어있어 전문을 올리지는 않았지만, 필요하시다면 <mingu4969@mgmail.com>으로 연락해주시면 대응하겠습니다.
+- 개인정보등 민감한 개인 정보도 포함되어있어 전문을 올리지는 않았지만, 필요하시다면 <mingu4969@gmail.com>으로 연락해주시면 대응하겠습니다.
 
     ![nexon_answer1](../docs_image/nexon_answer1.png)
     ![nexon_answer2](../docs_image/nexon_answer2.png)

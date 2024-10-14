@@ -42,6 +42,36 @@
 - Web 검색 기능: 웹 검색 결과를 반영해 최신 정보나 필요한 정보를 대화에 활용할 수 있습니다.
 - 음성 인식 기능: 음성인식을 통해 대화가 가능하며, VAD 기능으로 음성과 소음을 구분합니다.
 - Easy Installer: 클릭 한 번으로 설치가 가능한 Installer를 제공하며, 설치 위치와 언어를 설정할 수 있습니다.
+- 최적화된 리소스 사용 : 상황에 맞춰 CPU/GPU 사용여부를 선택할 수 있고, GPU 사용시 최적화된 VRAM 사용량을 추천해줍니다.
+- 서버 기능 : Flask를 통해 API로 출력할 수 있게 하여 서버로서 활용하여 멀티플랫폼을 구축할 수 있습니다.
+
+## 이런 당신에게 필요한 프로젝트
+
+- 캐릭터와 상호작용하고 싶으신 분
+  - 높은 확장성으로 장르를 가리지 않고 대응할 수 있습니다.
+  - 타 프로그램 이용중에도 대화가 가능합니다.
+- 정서적 교감이 필요하신 분
+  - 넓어가는 간병인시장
+  - 격려와 피드백을 통한 의욕고취
+- 높은 AI 접근 장벽이 무서운 개발자/사용자
+  - 개발자는 작게는 파이썬 버전부터 크게는 dll설치까지 극악인 환경설정이 필요하지만, wheel로 가장 어려운 부분의 설치를 조율하여 개발에만 집중할 수 있습니다.
+  - 사용자도 복잡한 repo clone이나 설치 없이 원 클릭으로 가능한 설치환경 제공합니다.
+
+## 차별점 : Why JARVIS?
+
+Closed AI가 높은 편의성
+
+| **차이점**           | **Closed AI(GPT, Claude...)**                  | **Open Source(My Little Jarvis)**          |
+|----------------------|-----------------------------------------------|-----------------------------------------------|
+| **생태계**           | 대기업 위주                                    | 오픈소스.                                     |
+| **기술 공유**         | 대기업 중심의 관리                               | 개발자 및 사용자 중심의 대규모 글로벌 커뮤니티   |
+| **비용**             | 클라우드 기반, 종량제 요금제 사용.비쌈.            | 로컬 기반(+클라우드 지원), 무료.            |
+| **보안**             | 데이터가 서버로 전송될 수 있음                | 데이터가 외부로 전송되지 않음                 |
+| **컨트롤 자유도**    | 설정된 파라미터 내에서 이용                      | 개발자가 파라미터 설정 가능                   |
+| **인터넷 연결**      | 인터넷 필수, 서버에 의존                          | 인터넷 없이 오프라인으로 작동 가능               |
+| **확장성**           | API로 확장 가능, 제한된 커스터마이징               | 오픈소스라 다양한 기능 확장 및 모듈 추가 가능    |
+| **모델**             | 고정된 클라우드 모델 사용, 주어진 선택지에서 선택   | 다양한 모델을 직접 소유하고 경량화하거나 개조할 수 있음   |
+| **하드웨어**         | 높은 수준의 하드웨어 필요. (개인PC 불가)       | 수준에 맞는 하드웨어로 구동 가능. (개인PC 가능)   |
 
 ## 주요 서비스 화면
 
@@ -74,7 +104,7 @@
 ## 프로젝트 환경
 
 - Python 3.9.6
-  - llama-cpp-python에서 wheel을 사용하기 때문에 requirements.txt는 추천되지 않습니다.
+  - 가장 복잡한 설정이 필요한 llama-cpp-python을 wheel로 설치하기 때문에 requirements.txt는 추천되지 않습니다.
 - Cuda 11.6
 
 ``` bash
@@ -131,9 +161,35 @@ pip install llama-cpp-python --prefer-binary --extra-index-url=https://jllllll.g
 
 ```
 
+- 사용 AI 기술
+  - AI 대답 생성 및 의도 파악, 번역, 서버 등 주요 AI 모듈
+    - 사용 주 기술 : LLama.cpp, langchain, transformers
+    - 사용 모델 : Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf
+  - AI 캐릭터 생성
+    - 사용 도구 : Stable Diffusion
+    - 사용 주 모델 : Animagine3.1
+  - AI 캐릭터 애니메이션 생성
+    - 사용 도구 : Stable Diffusion, ComfyUI
+    - 사용 주 기술 : AnimateDiff, ToonCrafter
+  - Web 검색용 단어 단축
+    - 사용 주 기술 : sentence-transformers, duckduckgo_search
+    - 사용 모델 : all-MiniLM-L6-v2
+  - AI 음성 합성
+    - 사용 기술 : VITS (ISTFT로 고속 추론)
+    - 사용 데이터 : KSS 오픈 데이터
+  - AI 음성 인식
+    - 사용 기술 : faster-whisper + sound, VAD
+    - 사용 모델 : Systran-faster-whisper-small, sillero_vad
+  - AI 화상 인식
+    - 사용 기술 : Florence2
+    - 사용 모델 : Microsoft-Florence-2-base
 - 외부 파일
   - kss_korean_ISTFT.pth
   - Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf
+  - Microsoft-Florence
+  - Sentence Transformers-all-MiniLM-L6-v2
+  - Faster-whisper(small)
+  - sillero_vad.onnx
 
 ## 배포
 
@@ -145,10 +201,7 @@ pyinstaller --onedir server_interface.py -n jarvis_server --noconsole --contents
 pyinstaller --onedir server_interface_jp.py -n jarvis_server_jp --contents-directory=files_server --noconfirm --icon=./assets/ico/icon_arona.ico --noconsole 
 ```
 
-- 업로드
-
-- 다운로드
-https://huggingface.co/mingu4969/my-little-jarvis-dist/resolve/main/Install.exe
+- 정식 다운로드 링크 : [https://huggingface.co/mingu4969/my-little-jarvis-dist/resolve/main/Install.exe]
 
 ## Special Thanks
 
