@@ -1053,7 +1053,7 @@ class AnswerBalloon(tk.Toplevel):
         
         
     def create_text(self, text):
-        self.text_label = self.canvas.create_text(self.canvas_width // 2, 0, text=text, anchor='center', fill="black", width=self.canvas_width - 60, font=("Noto Sans", 12, "bold"))
+        self.text_label = self.canvas.create_text(self.canvas_width // 2, 0, text=text, anchor='center', fill="black", width=self.canvas_width - 60, font=("Noto Sans CJK", 12, "bold"))
         x0, y0, x1, y1 = self.canvas.bbox(self.text_label)
         self.canvas_height = int(y1 - y0 + 60)
         self.canvas.config(height=self.canvas_height)
@@ -4484,9 +4484,11 @@ if __name__ == "__main__":
     menu.add_separator()  
     screenshotApp = ScreenshotApp(root, menu)
     menu.add_command(label=get_message_ui("Activate Focus"), command=lambda: active_focus())
-    menu.add_separator()  
-    menu.add_command(label=get_message_ui("Load models"), command=lambda: load_models())
-    menu.add_command(label=get_message_ui("Clean models"), command=lambda: clean_models())
+    # CPU 버전에만 모델 로딩과 클린 추가
+    if not is_use_cuda:
+        menu.add_separator()  
+        menu.add_command(label=get_message_ui("Load models"), command=lambda: load_models())
+        menu.add_command(label=get_message_ui("Clean models"), command=lambda: clean_models())
     # menu.add_separator()  
     # menu.add_command(label="S.Balloon", command=lambda: show_status_balloon(image_folder='./assets/fx/loading2'))
     # menu.add_command(label="K.Balloon", command=kill_status_balloon)
