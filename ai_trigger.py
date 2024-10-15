@@ -43,7 +43,6 @@ def process_stream(query, player, character, is_sentence, is_regenerate, info_ra
         visible_reply = ''
         reply = None
         for j, reply in enumerate(generate_reply(query, player, character, is_sentence, is_regenerate)):
-            # print('reply2', reply)
             visible_reply = reply
             visible_reply = re.sub("(<USER>|<user>|{{user}})", 'You', reply)
             visible_reply = visible_reply.replace("\n",'')
@@ -51,7 +50,6 @@ def process_stream(query, player, character, is_sentence, is_regenerate, info_ra
             visible_reply = re.sub(r'\[[^)]*\]', '', visible_reply)  # []와 안의 내용물 제거
             visible_reply = re.sub(r'\*[^)]*\*', '', visible_reply)  # * *과 안의 내용물 제거
             visible_reply = visible_reply.lstrip(' ')
-            # print('visible_reply', visible_reply)
             yield visible_reply
 
 def generate_reply(*args, **kwargs):
@@ -113,7 +111,6 @@ def get_random_topic(topics):
     return topics[random_index]["eng"]
 
 def _generate_reply(query, player, character, is_sentence, is_regenerate, info_rag=None, info_memory=None, info_web=None, temperature=0.2):    
-    # print('is_sentence', is_sentence)
     global llm
     
     topic = get_random_topic(topics)
@@ -139,7 +136,6 @@ def _generate_reply(query, player, character, is_sentence, is_regenerate, info_r
             if reply_list:
                 _, stop_found = apply_stopping_strings(reply_list[-1], all_stop_strings)  # 마지막 문장만 체크하면 되겠네.
                 if stop_found:
-                    print('stop_found', stop_found, reply_list)
                     if len(reply_list)>=1:
                         reply_list = reply_list[:len(reply_list)-1]
                     break
@@ -160,7 +156,6 @@ def _generate_reply(query, player, character, is_sentence, is_regenerate, info_r
             # stop 문 있으면 break
             reply, stop_found = apply_stopping_strings(reply, all_stop_strings)
             if stop_found:
-                print('stop found', reply, stop_found)
                 break
             
             # 3문장 넘으면 break
@@ -203,7 +198,6 @@ def custom_generate_reply(question, original_question, seed, state, stopping_str
         
 # . ? ! 로 나눠지는 문장 반환 (최소 길이 10)
 def get_punctuation_sentences(texts):
-    # print(texts)
     text_list = texts.split('\n')
     
     sentences = []

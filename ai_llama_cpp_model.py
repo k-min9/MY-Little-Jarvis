@@ -60,7 +60,6 @@ class LlamaCppModel:
         temperature = 0.2
         if is_regenerate:
             temperature = 0.7
-        print('is_regenerate', is_regenerate)
         # LogitsProcessorList = llama_cpp.LogitsProcessorList
         prompt = prompt if type(prompt) is str else prompt.decode()
 
@@ -95,7 +94,6 @@ class LlamaCppModel:
         with Iteratorize(self.generate, args, kwargs, callback=None) as generator:
             reply = ''
             for token in generator:
-                # print('token', token)
                 reply += token
                 yield reply
 

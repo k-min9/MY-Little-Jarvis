@@ -54,7 +54,6 @@ def main_stream_simple():  # main logic
             if reply_len < len(reply_list):
                 reply_len = len(reply_list)
                 yield json.dumps({"reply_list": reply_list}) + '\n'
-        # print(reply_list)
     return Response(generate(), content_type='application/json')
 
 # 번역포함 답변
@@ -65,10 +64,7 @@ def main_stream():  # main logic
     char_name = request.json.get('char', 'arona')  # player key가 없을대의 초기값 m9dev
     ai_language = request.json.get('ai_language', 'en')  #  추론 언어 : 영입영출, 한입한출, 일입일출 등등
     
-    print('request.json', request.json)
-    
     query_trans = translator_google.translate(query, dest='en').text
-    print('query_trans', request.json)
     
     # image = ''  # TODO
     def generate():
@@ -94,9 +90,7 @@ def main_stream():  # main logic
                 answer['answer_jp'] = result_jp            
                 answer_list.append(answer)
                 
-                print(reply_list)
                 yield json.dumps({"reply_list": answer_list}) + '\n'
-        # print(reply_list)
     return Response(generate(), content_type='application/json')
 
 @app.route('/health', methods=['GET'])
@@ -131,7 +125,7 @@ def get_available_vram_gb_for_server():
         nvmlShutdown()
         return min(available_vram_mb-1, max_vram)  # 여유 vram 1GB 남기기
     except Exception as e:
-        print(f"Failed to get VRAM info: {e}")
+        # print(f"Failed to get VRAM info: {e}")
         return 0  # 기본값 8GB, 예외 발생 시
 
 if __name__ == '__main__':
@@ -152,14 +146,14 @@ if __name__ == '__main__':
         state.set_use_gpu_percent(use_vram)  # 8 = GPU 100%
     else:
         state.set_use_gpu_percent(0)
-    print(f"Init Option - Server Type: {server_type}, max_vram: {use_vram}")
+    # print(f"Init Option - Server Type: {server_type}, max_vram: {use_vram}")
 
     # Second Param = ko, jp
     voice_language = "ko"
     if len(sys.argv) > 2:
         if sys.argv[2] == "jp":
             voice_language = sys.argv[2]
-    print(f"Init Option - Voice Language: {voice_language}")
+    # print(f"Init Option - Voice Language: {voice_language}")
     
     # preloading
     inference_ko.get_audio_file('korean', '안녕하세요!')

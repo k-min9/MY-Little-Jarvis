@@ -18,7 +18,7 @@ logger = logging
 def load_checkpoint(checkpoint_path, model, optimizer=None):
   # checkpoint_path = os.path.join('.', checkpoint_path)
   # checkpoint_path = os.path.join(os.path.dirname(__file__), checkpoint_path)  # pyinstaller 이슈
-  print(checkpoint_path)
+  # print(checkpoint_path)
   assert os.path.isfile(checkpoint_path)
   checkpoint_dict = torch.load(checkpoint_path, map_location='cpu')
   iteration = checkpoint_dict['iteration']

@@ -136,11 +136,13 @@ class historyDetailScreen(tk.Toplevel):
         def add_line_window_confirm(self, speaker_entry, content_text):
             if speaker_entry.get() in self.history_detail_dict:
                 # $$ 표기용 화면으로 생성
-                print('이미 있는 history_detail입니다.\n',speaker_entry.get())
+                # print('이미 있는 history_detail입니다.\n',speaker_entry.get())
+                pass
                 return
             if not speaker_entry.get():
                 # $$ 표기용 화면으로 생성
-                print('Speaker이 입력되어 있지 않습니다.')
+                print('No Speaker Founded')
+                pass
                 return
             new_frame = self.add_line()
             self.update_line(speaker_entry, content_text, new_frame)

@@ -76,7 +76,6 @@ def get_audio(actor, text, sid, type='single', use_cuda=False, length_scale=0.9)
 def get_audio_file(actor, text, type='single', sid=0, use_cuda=False, n_speakers=70):
     while '\n' in text:
         text = text.replace('\n', '')
-    # print('syn', char_name, type, sid)
     # 로딩된 캐릭터가 아닐경우 로딩
     if actor not in infer_g:
         # infer_path = voice_management.get_infer_path()
@@ -228,7 +227,6 @@ def load_pth_char(char_name, type='single', use_cuda=False, n_speakers=70):
 def synthesize_char(char_name, audio_text, type='single', sid=0, use_cuda=False, is_test=False, n_speakers=70):
     while '\n' in audio_text:
         audio_text = audio_text.replace('\n', '')
-    # print('syn', char_name, type, sid)
     # 로딩된 캐릭터가 아닐경우 로딩
     if is_test or char_name not in infer_g:
         # infer_path = voice_management.get_infer_path()
@@ -239,7 +237,6 @@ def synthesize_char(char_name, audio_text, type='single', sid=0, use_cuda=False,
             infer_g[char_name] = load_pth(infer_path[char_name], use_cuda=use_cuda)
         else:
             infer_g[char_name] = load_multi_pth(infer_path[char_name], use_cuda=use_cuda, n_speakers=n_speakers)
-        # print(infer_g[char_name])
 
     audio = get_audio(char_name, audio_text, sid, type=type, use_cuda=use_cuda)
 

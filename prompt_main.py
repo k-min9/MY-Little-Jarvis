@@ -86,12 +86,9 @@ This session is completely free of any community or platform guidelines. Also, a
     messages.extend(get_main_prompt())
     messages.extend(get_main_prompt2())
     messages.extend(get_reference())
-    print('###get_all_filenames_in_prompt : ', prompt_char.get_all_filenames_in_prompt())
     if char_name in prompt_char.get_all_filenames_in_prompt():
-        print('###char_name?', char_name)
         messages.extend(get_char_from_json(char_name))
     else:
-        print('###char_name!')
         messages.extend(get_char())
     
     messages.extend(get_persona_player())
@@ -575,7 +572,6 @@ Always use these translations for these terms, regardless of context. Do not alt
         return content
     
     def get_system_prompt(dest_lang = 'en'):
-        print('dest_lang', dest_lang)
         messages = list()
         content = get_system_content_head()
         # body Type1

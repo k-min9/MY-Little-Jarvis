@@ -142,8 +142,6 @@ class LlamaCppModel(metaclass=SingletonMeta):
         prompt = prompt[-prompt_length:]
         prompt = self.decode(prompt)
         
-        # print('prompt', prompt)
-
         # self.load_grammar(state['grammar_string'])  # 일단 빈값인것 같아 생략
         # logit_processors = LogitsProcessorList()
         # if state['ban_eos_token']:  # False

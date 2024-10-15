@@ -420,7 +420,7 @@ class LoadingOptionScreen:
                 nvmlShutdown()
                 return min(available_vram_mb, max_vram)
             except Exception as e:
-                print(f"Failed to get VRAM info: {e}")
+                # print(f"Failed to get VRAM info: {e}")
                 return 0  # 기본값 8GB, 예외 발생 시
         self.frame_vram = ttk.Frame(master)
         self.vram_label = ttk.Label(self.frame_vram, text="VRAM (GB):")
@@ -1432,7 +1432,6 @@ class StatusBalloon(tk.Toplevel):
         self.title('balloon')
         
         # self.size_width = master.winfo_width() * 0.5 if master else 100
-        # print('master.winfo_width()', master.winfo_width())
         self.rate = 1
         if master:
             self.rate = master.winfo_width() / 250
@@ -1562,9 +1561,7 @@ def set_size(rate):
     root_height = int(root_frame_height*rate)
     y -= root_height
     
-    root.geometry(f"{root_width}x{root_height}+{int(x)}+{int(y)}")  
-    print('set_size', f"{root_width}x{root_height}+{int(x)}+{int(y)}")
-    
+    root.geometry(f"{root_width}x{root_height}+{int(x)}+{int(y)}")      
 
 def init_anim():
     global loaded_settings, loaded_settings_eden
@@ -1742,7 +1739,7 @@ def set_status(change_status):
         if anim_status in ('think', 'pick', 'fall', 'sit'):  # 애니메이션 없으면 idle로 교체
             anim_status = 'idle'
         else:
-            print('no such status : ' + change_status)
+            # print('no such status : ' + change_status)
             return
     status = anim_status
     
@@ -1768,8 +1765,6 @@ def set_status(change_status):
     global window_bottom
     if anim_ground != new_anim_ground and window_bottom:  # 높이 변동이 있는 애니메이션 경우, 만약에 박힌 상태면 탈출
         y = min(y, window_bottom - (1-new_anim_ground)*root_height)
-    # print('###', change_status, anim_status)
-    # print('ha', x, y, anim_ground, new_anim_ground)
     anim_ground = new_anim_ground   
     root.geometry(f"{root_width}x{root_height}+{int(x)}+{int(y)}")  
     
@@ -1854,7 +1849,6 @@ def on_drag_release(event):
 
 def update(delta):
     # current, peak = tracemalloc.get_traced_memory()
-    # print(f"Current memory usage: {current / 10**6} MB, Peak usage: {peak / 10**6} MB")
     def update_frame_event(delta):
         global status, duration_anim, is_dragging, is_chatting, is_falling, is_waiting, anim_idx
         if is_dragging or is_chatting or is_falling or is_waiting:
@@ -1902,7 +1896,7 @@ def update(delta):
                 else:
                     duration_anim = 1000  # 상태유지
             else:
-                print('update frame error : ', status)
+                # print('update frame error : ', status)
                 set_status('idle')
     
     # 초기화
@@ -1967,7 +1961,6 @@ def update_physics_move():
 
         # 충돌에 따른 이동 방향 (UDLR)
         direction, direction_target = get_dir_from_collisions(points, windows)
-        # print('here', x, y, direction, direction_target, status)
         
         # 선이 아래로 뚫고 갔는지 체크
         # direction, direction_target = get_dir_from_line(points, windows)
@@ -2073,7 +2066,6 @@ def update_physics_move():
                             set_status('idle')
                     elif status == 'walk_right':
                         x += (1 + loaded_settings['setting_moving_speed'])   # 오른쪽로 1/2
-                        print('a', x, x-monitor_adj_x, monitor_screen_width-wx)
                         if 0<x-monitor_adj_x<monitor_screen_width-wx:
                             root.geometry(f"+{x}+{y}") 
                         else:
@@ -2096,7 +2088,6 @@ def update_physics_move():
     else: 
         FALL_GSPEED = 0      
         set_status('pick') 
-        print('###pickkkkkk')
     
     # 공유자원 침범의 냄새가 나는데...
     root.after(10, update_physics_move)  # 10밀리초마다 작동 (100프레임)
@@ -2177,9 +2168,7 @@ def check_if_repeated(text):
             chk2 = text[j+2*i:j+3*i]
 
             if repeats >= 3 and sub_string == chk1 == chk2:
-                print(sub_string, repeats)
                 return False
-    # print(sub_string, repeats)
     return True
 
 def chat_key_listener():
@@ -2234,14 +2223,13 @@ def talk_listener():
                                         time.sleep(0.2)
                                 except sr.WaitTimeoutError as e:
                                     # print(e)
-                                    # print('time out')
                                     pass
                                 except sr.UnknownValueError:
                                     print("음성을 인식할 수 없습니다.")
                                 except sr.RequestError as e:
-                                    print("Google API 요청에 실패했습니다. 에러: {}".format(e))
+                                    pass
+                                    # print("Google API 요청에 실패했습니다. 에러: {}".format(e))
                         except Exception:
-                            print('no key')
                             is_chatting = False
                             set_status('idle')
                 elif loaded_settings['setting_talk_mode'] == "Auto":
@@ -2274,7 +2262,7 @@ def talk_listener():
                                 if status_balloon:
                                     status_balloon.kill_balloon()
                                 # $$$ 대화
-                                print("인식된 텍스트: {}".format(text))
+                                # print("인식된 텍스트: {}".format(text))
                                 
                                 if loaded_settings['setting_ai_sr'] == "check":
                                     ask_balloon = SRBalloon(text)
@@ -2299,15 +2287,14 @@ def talk_listener():
                         except sr.UnknownValueError:
                             print("음성을 인식할 수 없습니다.")
                         except sr.RequestError as e:
-                            print("음성 인식 엔진에 오류가 발생했습니다. 에러: {}".format(e))
+                            pass
+                            # print("음성 인식 엔진에 오류가 발생했습니다. 에러: {}".format(e))
                 time.sleep(0.2)  # 0.2초 대기 후 다음 반복
     except Exception as e:
-        print(e)
-        print('감지 오디오 기기 없음')
+        # print(e)
         is_talk_thread_activated = False
 
 def talk_tikitaka_callback(recognizer, audio):
-    print('callbacked!')
     global loaded_settings
     if loaded_settings['setting_talk_language'] == '日本語':
         text = recognizer.recognize_fasterwhisper(audio, language="ja", model=loaded_settings['setting_talk_quality']) 
@@ -3361,9 +3348,7 @@ def change_to_focus_mode():
     global is_focus, screenshotApp
     def find_menu_index(menu_name, menu):
         for index in range(menu.index("end") + 1):
-            # print('menutype', index, menu.type(index))
             if menu.type(index) == "command":
-                # print('menu label', menu.entrycget(index, "label"))
                 label = menu.entrycget(index, "label")
                 if label == menu_name:
                     return index
@@ -3556,7 +3541,6 @@ def load_models():
         synthesize_char('korean', '안녕하세요.', use_cuda=is_use_cuda, type='single', sid=0)
     elif loaded_settings['setting_load_option'] == 'Custom':
         setting_load_option_customlist = loaded_settings['setting_load_option_customlist']  # conversation, web, story, translation, S.memory, L.memory, image.R, sound.R
-        print('setting_load_option_customlist', setting_load_option_customlist)
         load_models_cnt = str(len(setting_load_option_customlist) + 1)
         i = 1
         if "conversation" in setting_load_option_customlist:
@@ -3975,7 +3959,6 @@ def conversation(user_input):
     intent_response = ''
     if loaded_settings["setting_ai_web"] == "on" or loaded_settings["setting_ai_story"] == "on" or loaded_settings["setting_ai_memory"] == "on" :
         intent_response = ai_intent_reader.process(trans_question)
-        print('intent_response', intent_response)
         
     response_web_result = None
     if "web: True" in intent_response:
@@ -4009,7 +3992,6 @@ def conversation(user_input):
         
     #     if "[No]" in response_rag_result.split('\n')[0]:  # 첫줄에 [NO]가 있으면 안쓰씀
     #         log['rag'] = 'Denied'
-    #         print('response_rag_result denied', response_rag_result)
     #         response_rag_result = None
     #     else:
     #         response_rag_result = response_rag_result.split('\n')[0].split('[No]')[0]  # 정제
@@ -4023,7 +4005,6 @@ def conversation(user_input):
     answer['answer_ko'] = ''
     answer['answer_jp'] = ''
     for j, reply_list in enumerate(ai_conversation.process_stream(trans_question, loaded_settings['setting_name'], loaded_settings['setting_char'], True, False)):
-        # print('reply_list', reply_list)
         if last_reply_len < len(reply_list):
             # 새로운 문장  
             last_reply_len = len(reply_list)    
@@ -4195,10 +4176,8 @@ def open_versions(e=None):
     #     with open('./config/setting.pickle', 'rb') as file:
     #         data = pickle.load(file)
     #         if 'version_num' in data:
-    #             print('version_num', version_num)
     #             version_num = data['version']
     #         if 'version_name' in data:
-    #             print('version_name', version_name)
     #             version_name = data['version_name']
     # except:
     #     print(get_message('There is a problem with the metafile information\nPlease report it so I can handle it.'))
@@ -4561,17 +4540,14 @@ if __name__ == "__main__":
     if llama_server:
         llama_server.stop()
     
-    # 현재 티키타카 쪽이 잘 정리되지 않고 있음
+    # thread 강제 정리
     # sys.exit()
     os._exit(0)
     
-    print('a_tikitaka_thread', tikitaka_thread)
     if tikitaka_thread and tikitaka_thread.is_alive():
         tikitaka_thread.join()
-    print('a_tikitaka_status_thread', tikitaka_status_thread)
     if tikitaka_status_thread and tikitaka_status_thread.is_alive():
         tikitaka_status_thread.join()
-    print('a_screenshotApp', screenshotApp)
     if screenshotApp and screenshotApp.continuous_save_running:
         screenshotApp.toggle_continuous_save()  # 연속저장 종료시 알아서 thread join
 

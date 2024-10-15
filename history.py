@@ -155,7 +155,7 @@ class HistoryScreen(tk.Toplevel):
     
     def open_history_detail(self, item):
         # Placeholder function to open history detail
-        print(f"Open details for {item['title']}")
+        # print(f"Open details for {item['title']}")
         history_detail.open_history_detail_screen(self, item, None)
 
     def modify_history_item(self, item, item_label):
@@ -231,7 +231,6 @@ class HistoryScreen(tk.Toplevel):
         self.wait_window(ask_question_box)
         if ask_question_box.result:  
             new_learning = self.summary_stream()
-            print('learning', new_learning)
             if new_learning:
                 pass
                 # # title 변경
@@ -302,7 +301,8 @@ class HistoryScreen(tk.Toplevel):
                     trait_reason_trans = trait_reason_trans.replace('{user}', 'user').replace('{User}', 'user').replace('user', '{user}')
                     trait_reason_trans = self.translator.translate(trait_reason_trans, dest=self.language).text  
                 except Exception as e:
-                    print(f"Translation error: {e}")
+                    pass
+                    # print(f"Translation error: {e}")
 
             # 개별 Frame 생성
             frame = tk.Frame(inner_frame)
@@ -335,7 +335,6 @@ class HistoryScreen(tk.Toplevel):
         def on_learn():
             # 학습 버튼 클릭 시 선택된 trait 정보를 리스트로 반환
             selected = [trait_info for trait_info, var in selected_traits if var.get() == 1]
-            print("Selected traits for learning:", selected)
             top.destroy()
             self.selected_traits = selected
 

@@ -144,8 +144,6 @@ class LlamaCppModel:
         prompt = prompt[-prompt_length:]
         prompt = self.decode(prompt)
         
-        # print('prompt', prompt)
-
         # self.load_grammar(state['grammar_string'])  # 일단 빈값인것 같아 생략
         # logit_processors = LogitsProcessorList()
         # if state['ban_eos_token']:  # False
@@ -363,7 +361,6 @@ def process(query):
             visible_reply = re.sub(r'\*[^)]*\*', '', visible_reply)  # * *과 안의 내용물 제거
             visible_reply = visible_reply.lstrip(' ')
             visible_reply_list.append(visible_reply)
-        print('visible_reply_list', visible_reply_list)
         yield visible_reply_list
 
 # Loading시 시작해야함, 원본 seach LLM extension script.py의 toggle_extension
@@ -376,8 +373,6 @@ def start_compressor():
     compressor_model = langchain_compressor.embeddings.client
     compressor_model.to(compressor_model._target_device)
     
-    print('os.path.join(extension_path, "model")', os.path.join(extension_path, "model"))
-
 
 # From LLM websearch  
 # generate_func 추가
@@ -418,10 +413,8 @@ def custom_generate_reply(question, original_question, seed, state, stopping_str
     # if shared.model.__class__.__name__ in ['LlamaCppModel', 'RWKVModel', 'ExllamaModel', 'Exllamav2Model',
     #                                        'CtransformersModel']:
     #     generate_func = generate_reply_custom 
-    #     print('generate_func', 'generate_reply_custom')  ### 이거
     # else:
     #     generate_func = generate_reply_HF
-    #     print('generate_func', 'generate_reply_HF')
 
     # if not params['enable']:  # 당근 enable이니까 여길 왔지
     #     for reply in generate_func(question, original_question, seed, state, stopping_strings, is_chat=is_chat):
@@ -462,9 +455,6 @@ def custom_generate_reply(question, original_question, seed, state, stopping_str
     compiled_search_command_regex = re.compile(search_command_regex)
     compiled_open_url_command_regex = re.compile(open_url_command_regex)
 
-    # print('force_search', force_search)
-    print('compiled_search_command_regex', compiled_search_command_regex)
-    print('compiled_open_url_command_regex', compiled_open_url_command_regex)
     # force_search = True
     # if force_search:
     #     question += f" {params['force search prefix']}"
@@ -475,19 +465,16 @@ def custom_generate_reply(question, original_question, seed, state, stopping_str
     for reply in generate_func(question):
 
         # if force_search:
-        #     print('reply + force', reply)
         #     reply = params["force search prefix"] + reply
         reply = params["force search prefix"] + reply
-        # print(reply)  # Search_web("Disney's history and publishing
 
         search_re_match = compiled_search_command_regex.search(reply)
-        # print('search_re_match', reply)
         if search_re_match is not None:
             yield reply
             original_model_reply = reply
             web_search = True
             search_term = search_re_match.group(1)
-            print(f"LLM_Web_search | Searching for {search_term}")
+            # print(f"LLM_Web_search | Searching for {search_term}")
             reply += "\n```plaintext"
             reply += "\nSearch tool:\n"
             # print('searxng_url', searxng_url)  # 비어있음 여기 안탐
@@ -496,40 +483,32 @@ def custom_generate_reply(question, original_question, seed, state, stopping_str
             #                                                              langchain_compressor,
             #                                                              max_search_results,
             #                                                              instant_answers))
-            #     print('search_generator', search_generator)
             # else:
             #     search_generator = Generator(langchain_search_searxng(search_term,
             #                                                           searxng_url,
             #                                                           langchain_compressor,
             #                                                           max_search_results))
-            print('search_term', search_term)
             search_generator = Generator(langchain_search_duckduckgo(search_term,
                                                                         langchain_compressor,
                                                                         max_search_results,
                                                                         instant_answers)) 
-            print('gen')
             try:
                 for status_message in search_generator:
-                    print('status_message', status_message)
                     yield original_model_reply + f"\n*{status_message}*"
                 search_results = search_generator.value
-                print('search_results', search_results)
             except Exception as exc:
                 exception_message = str(exc)
                 reply += f"The search tool encountered an error: {exception_message}"
-                print(f'LLM_Web_search | {search_term} generated an exception: {exception_message}')
+                # print(f'LLM_Web_search | {search_term} generated an exception: {exception_message}')
             else:
                 if search_results != "":
                     reply += search_results
-                    print('search_results_reply', search_results)
                 else:
                     reply += f"\nThe search tool did not return any results."
             reply += "```"
             if display_search_results:
                 yield reply
             break
-
-        # print('web search fin')
         
         open_url_re_match = compiled_open_url_command_regex.search(reply)
         if open_url_re_match is not None:
@@ -537,14 +516,14 @@ def custom_generate_reply(question, original_question, seed, state, stopping_str
             original_model_reply = reply
             read_webpage = True
             url = open_url_re_match.group(1)
-            print(f"LLM_Web_search | Reading {url}")
+            # print(f"LLM_Web_search | Reading {url}")
             reply += "\n```plaintext"
             reply += "\nURL opener tool:\n"
             try:
                 webpage_content = get_webpage_content(url)
             except Exception as exc:
                 reply += f"Couldn't open {url}. Error message: {str(exc)}"
-                print(f'LLM_Web_search | {url} generated an exception: {str(exc)}')
+                # print(f'LLM_Web_search | {url} generated an exception: {str(exc)}')
             else:
                 reply += f"\nText content of {url}:\n"
                 reply += webpage_content
@@ -554,13 +533,10 @@ def custom_generate_reply(question, original_question, seed, state, stopping_str
             break
         yield reply
 
-    print('web_search', web_search)
-    print('read_webpage', read_webpage)
     if web_search or read_webpage:
     #     display_results = web_search and display_search_results or read_webpage and display_webpage_content
         display_results = False
         # Add results to context and continue model output
-        print('before chat.generate_chat_prompt', f"{question}{reply}", state)
         # new_question = chat.generate_chat_prompt(f"{question}{reply}", state)
         
         # ChatLM Style
@@ -574,22 +550,15 @@ def custom_generate_reply(question, original_question, seed, state, stopping_str
         new_question = question + reply + """<|eot_id|><|start_header_id|>assistant<|end_header_id|>
 
 """     
-
-        print('new_question!!!!', new_question)
-        print('new_question####')
         
-        # print('new_question', new_question)
         new_reply = ""
         # for new_reply in generate_func(new_question, new_question, seed, state, stopping_strings, is_chat=is_chat):
-        print('new_question start')
         for new_reply in generate_func(new_question):
             if display_results:
                 yield f"{reply}\n{new_reply}"
             else:# 여기임
                 # yield f"{original_model_reply}\n{new_reply}"
                 yield f"{new_reply}"
-        
-        # print('new_reply', new_reply)
 
         # if not display_results:
         #     update_history = [state["textbox"], f"{reply}\n{new_reply}"]
@@ -678,8 +647,6 @@ def _generate_reply(question, state=None, stopping_strings=None, is_chat=False, 
     # question = get_ChatLM_question(question)
     question = get_LLAMA3_question(question)
     
-    
-    print('question', question)
     global llm
     all_stop_strings = ['\nYou:', '<|im_end|>\n<|im_start|>user\n', '<|im_end|>\n<|im_start|>assistant\n', '\nAI:', "<|eot_id|>"]
     # for reply in custom_generate_reply(question, None, -1, None, None, True, model.generate):  # no stream
@@ -706,7 +673,6 @@ def _generate_reply(question, state=None, stopping_strings=None, is_chat=False, 
         if reply_list:
             _, stop_found = apply_stopping_strings(reply_list[-1], all_stop_strings)  # 마지막 문장만 체크하면 되겠네.
             if stop_found:
-                print('stop_found', stop_found, reply_list)
                 if len(reply_list)>=1:
                     reply_list = reply_list[:len(reply_list)-1]
                 break

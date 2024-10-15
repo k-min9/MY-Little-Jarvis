@@ -107,7 +107,7 @@ class FasterWhisperListener:
                     "stream": True,
                     "prompt": prompt,
                 }
-                print(f"starting request on '{detected_text}'")
+                # print(f"starting request on '{detected_text}'")
                 print("Performing request to LLM server...")
 
                 if self.answer_balloon:
@@ -152,7 +152,6 @@ class FasterWhisperListener:
                                     "\n\n",
                                 ]:
                                     processed_sentence = self._process_sentence(sentence)
-                                    print('answer', processed_sentence)
                                     if '<|im' in processed_sentence:
                                         processed_sentence = processed_sentence.split('<|im')[0]
                                         self.processing = False
@@ -185,7 +184,6 @@ class FasterWhisperListener:
                     if self.processing:
                         if sentence:
                             processed_sentence = self._process_sentence(sentence)
-                            print('answer', processed_sentence)
                             if '<|im' in processed_sentence:
                                 processed_sentence = processed_sentence.split('<|im')[0]
                                 self.processing = False
@@ -229,9 +227,8 @@ class FasterWhisperListener:
             "stream": True,
             "prompt": prompt,
         }
-        print(f"starting request on '{text}'")
+        # print(f"starting request on '{text}'")
         print("Performing request to LLM server...")
-        # print('prompt', prompt)
 
         # Perform the request and process the stream
         with requests.post(
@@ -273,7 +270,6 @@ class FasterWhisperListener:
             .replace(":", " ")
         )
         if sentence:
-            # print('sentence', sentence)
             # self.tts_queue.put(sentence)
             return sentence
             
@@ -353,7 +349,7 @@ class FasterWhisperListener:
         detected_text = self.transcribe_audio(self._samples)
 
         if detected_text:
-            print(f"ASR text: '{detected_text}'")
+            # print(f"ASR text: '{detected_text}'")
 
             # if self.wake_word and not self._wakeword_detected(detected_text):
             #     print(f"Required wake word {self.wake_word=} not detected.")

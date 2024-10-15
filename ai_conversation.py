@@ -139,9 +139,6 @@ Image info tool command format: Image_info
 Image_info
 ```plaintext\n"""+ image_info + """\n```<|eot_id|><|start_header_id|>assistant<|end_header_id|>"""
     
-    print('###prompt', prompt)
-    print('###prompt end')
-    
     return prompt
 
 #### 대답 Stream 계열
@@ -200,7 +197,6 @@ class LlamaCppModel:
         temperature = 0.2
         if is_regenerate:
             temperature = 0.7
-        print('is_regenerate', is_regenerate)
         # LogitsProcessorList = llama_cpp.LogitsProcessorList
         prompt = prompt if type(prompt) is str else prompt.decode()
 
@@ -235,7 +231,6 @@ class LlamaCppModel:
         with Iteratorize(self.generate, args, kwargs, callback=None) as generator:
             reply = ''
             for token in generator:
-                # print('token', token)
                 reply += token
                 yield reply
    
@@ -324,7 +319,6 @@ def process_stream(query, player, character, is_sentence, is_regenerate, info_ra
         visible_reply = ''
         reply = None
         for j, reply in enumerate(generate_reply(query, player, character, is_sentence, is_regenerate, info_rag=info_rag, info_memory=info_memory, info_web=info_web, info_img=info_img)):
-            # print('reply2', reply)
             visible_reply = reply
             visible_reply = re.sub("(<USER>|<user>|{{user}})", 'You', reply)
             visible_reply = visible_reply.replace("\n",'')
@@ -332,7 +326,6 @@ def process_stream(query, player, character, is_sentence, is_regenerate, info_ra
             visible_reply = re.sub(r'\[[^)]*\]', '', visible_reply)  # []와 안의 내용물 제거
             visible_reply = re.sub(r'\*[^)]*\*', '', visible_reply)  # * *과 안의 내용물 제거
             visible_reply = visible_reply.lstrip(' ')
-            # print('visible_reply', visible_reply)
             yield visible_reply
     
 def generate_reply(*args, **kwargs):
@@ -371,7 +364,6 @@ def apply_stopping_strings(reply, all_stop_strings = ['\nYou:', '<|im_end|>\n<|i
     return reply, stop_found
     
 def _generate_reply(query, player, character, is_sentence, is_regenerate, info_rag=None, info_memory=None, info_web=None, info_img=None, temperature=0.2):    
-    # print('is_sentence', is_sentence)
     global llm
     prompt = ''
     if info_img:
@@ -383,7 +375,6 @@ def _generate_reply(query, player, character, is_sentence, is_regenerate, info_r
     if is_sentence:
         reply_list = list()
         for reply in custom_generate_reply(prompt, None, -1, None, None, True, is_regenerate, llm.generate_with_streaming):  # stream   
-            # print('r', reply)  
             reply_list = get_punctuation_sentences(reply)
             # reply_list_creating = reply_list[:len(reply_list)-1]
             
@@ -400,7 +391,6 @@ def _generate_reply(query, player, character, is_sentence, is_regenerate, info_r
             if reply_list:
                 _, stop_found = apply_stopping_strings(reply_list[-1], all_stop_strings)  # 마지막 문장만 체크하면 되겠네.
                 if stop_found:
-                    print('stop_found', stop_found, reply_list)
                     if len(reply_list)>=1:
                         reply_list = reply_list[:len(reply_list)-1]
                     break
@@ -422,7 +412,6 @@ def _generate_reply(query, player, character, is_sentence, is_regenerate, info_r
             # stop 문 있으면 break
             reply, stop_found = apply_stopping_strings(reply, all_stop_strings)
             if stop_found:
-                print('stop found', reply, stop_found)
                 break
             
             reply_list = get_punctuation_sentences(reply)
@@ -449,7 +438,6 @@ def custom_generate_reply(question, original_question, seed, state, stopping_str
 
 # . ? ! 로 나눠지는 문장 반환 (최소 길이 10)
 def get_punctuation_sentences(texts):
-    # print(texts)
     text_list = texts.split('\n')
     
     sentences = []
@@ -507,7 +495,7 @@ if __name__ == "__main__":
     for j, reply_list in enumerate(process_stream(question, 'm9dev', 'arona', True, False)):
         if last_reply_len < len(reply_list):
             last_reply_len = len(reply_list)
-            print('reply_list', reply_list)
+            # print('reply_list', reply_list)
     
     # Stream 테스트 (이미지)
     # question = "what can you see?"

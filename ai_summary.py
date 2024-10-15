@@ -92,7 +92,6 @@ Example:
     messages.append({"role": "system", "content": content})
     # messages.extend(prompt_main.get_message_list_main())
     conversations = memory.get_memory_message_list(99999)  # 최대 128K
-    print(conversations)
     dialog = ""
     for conversation in conversations:
         role = conversation['role']
@@ -125,11 +124,9 @@ Example:
     return prompt
 
 def _generate_reply(query, player, character, is_sentence, is_regenerate, info_rag=None, info_memory=None, info_web=None, temperature=0):    
-    # print('is_sentence', is_sentence)
     global llm
     
     prompt = get_LLAMA3_prompt()
-    # print(prompt)
 
     # all_stop_strings = ['\nYou:', '<|im_end|>', '<|im_start|>user', '<|im_start|>assistant\n', '\nAI:', "<|eot_id|>"]
     # reply_list = list()
@@ -151,7 +148,6 @@ def _generate_reply(query, player, character, is_sentence, is_regenerate, info_r
         # if reply_list:
         #     _, stop_found = apply_stopping_strings(reply_list[-1], all_stop_strings)  # 마지막 문장만 체크하면 되겠네.
         #     if stop_found:
-        #         print('stop_found', stop_found, reply_list)
         #         if len(reply_list)>=1:
         #             reply_list = reply_list[:len(reply_list)-1]
         #         break
@@ -196,7 +192,6 @@ def custom_generate_reply(question, original_question, seed, state, stopping_str
 # . ? ! 로 나눠지는 문장 반환 (최소 길이 10)
 # 여기서는 안쓰임
 def get_punctuation_sentences(texts):
-    # print('punc_texts', texts)
     text_list = texts.split('\n')
     
     sentences = []

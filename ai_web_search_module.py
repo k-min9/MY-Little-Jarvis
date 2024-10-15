@@ -161,12 +161,14 @@ async def async_download_html(url, headers):
             resp = await session.get(url)
             return await resp.text()
         except UnicodeDecodeError:
-            print(
-                f"LLM_Web_search | {url} generated an exception: Expected content type text/html. Got {resp.headers['Content-Type']}.")
+            # print(f"LLM_Web_search | {url} generated an exception: Expected content type text/html. Got {resp.headers['Content-Type']}.")
+            pass
         except TimeoutError as exc:
-            print('LLM_Web_search | %r did not load in time' % url)
+            # print('LLM_Web_search | %r did not load in time' % url)
+            pass
         except Exception as exc:
-            print('LLM_Web_search | %r generated an exception: %s' % (url, exc))
+            # print('LLM_Web_search | %r generated an exception: %s' % (url, exc))
+            pass
     return None
 
 
@@ -262,14 +264,14 @@ def langchain_search_duckduckgo(query: str, langchain_compressor: LangchainCompr
                                 max_results=langchain_compressor.num_results):
             results.append(result)
             result_urls.append(result["href"])
-    print('retrieval_gen', query, result_urls)
+    # print('retrieval_gen', query, result_urls)
     retrieval_gen = Generator(langchain_compressor.retrieve_documents(query, result_urls))
     for status_message in retrieval_gen:
         yield status_message
     documents.extend(retrieval_gen.value)
     if not documents:    # Fall back to old simple search rather than returning nothing
-        print("LLM_Web_search | Could not find any page content "
-              "similar enough to be extracted, using basic search fallback")
+        # print("LLM_Web_search | Could not find any page content "
+        #       "similar enough to be extracted, using basic search fallback")
         return dict_list_to_pretty_str(results[:max_results])
     return docs_to_pretty_str(documents[:max_results])
 

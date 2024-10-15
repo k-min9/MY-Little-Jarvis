@@ -27,12 +27,12 @@ def check_server_health(url):
     except requests.RequestException:
         return False
 
+# 반환없이 Test용
 def fetch_streaming_data(url, data):
     headers = {
         'Content-Type': 'application/json'
     }
     with requests.post(url, headers=headers, data=json.dumps(data), stream=True) as response:
-        print(response.status_code)
         if response.status_code == 200:
             for line in response.iter_lines():
                 if line:

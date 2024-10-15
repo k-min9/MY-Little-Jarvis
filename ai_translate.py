@@ -140,10 +140,7 @@ Image info tool command format: Image_info
     
 Image_info
 ```plaintext\n"""+ image_info + """\n```<|eot_id|><|start_header_id|>assistant<|end_header_id|>"""
-    
-    print('###prompt', prompt)
-    print('###prompt end')
-    
+        
     return prompt
 
 #### 대답 Stream 계열
@@ -203,7 +200,6 @@ class LlamaCppModel:
         temperature = 0.2
         if is_regenerate:
             temperature = 0.7
-        print('is_regenerate', is_regenerate)
         # LogitsProcessorList = llama_cpp.LogitsProcessorList
         prompt = prompt if type(prompt) is str else prompt.decode()
 
@@ -238,7 +234,6 @@ class LlamaCppModel:
         with Iteratorize(self.generate, args, kwargs, callback=None) as generator:
             reply = ''
             for token in generator:
-                # print('token', token)
                 reply += token
                 yield reply
    
@@ -359,7 +354,6 @@ def apply_stopping_strings(reply, all_stop_strings = ['\nYou:', '<|im_end|>\n<|i
     return reply, stop_found
     
 def _generate_reply(query, dest_lang = 'en', temperature=0):    
-    # print('is_sentence', is_sentence)
     global llm
     prompt = get_LLAMA3_prompt(query, dest_lang) 
 
@@ -383,7 +377,6 @@ def _generate_reply(query, dest_lang = 'en', temperature=0):
         if reply_list:
             _, stop_found = apply_stopping_strings(reply_list[-1], all_stop_strings)  # 마지막 문장만 체크하면 되겠네.
             if stop_found:
-                print('stop_found', stop_found, reply_list)
                 if len(reply_list)>=1:
                     reply_list = reply_list[:len(reply_list)-1]
                 break
@@ -412,7 +405,6 @@ def custom_generate_reply(question, original_question, seed, state, stopping_str
 
 # . ? ! 로 나눠지는 문장 반환 (최소 길이 10)
 def get_punctuation_sentences(texts):
-    # print(texts)
     text_list = texts.split('\n')
     
     sentences = []
