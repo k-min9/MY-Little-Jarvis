@@ -3193,7 +3193,7 @@ def open_ai_settings():
     global loaded_settings
     ai_settings_window = tk.Toplevel(root, padx=5, pady=5)
     ai_settings_window.title("AI Settings")
-    ai_settings_window.geometry("400x300")
+    ai_settings_window.geometry("320x90")
     
     frame_row_idx = 0
     
@@ -3246,17 +3246,17 @@ def open_ai_settings():
     #     story_radio.grid(row=0, column=col_idx + 1, padx=5, pady=5, sticky="w")
     # frame_row_idx += 1
 
-    # Memory settings
-    frame_memory = tk.Frame(ai_settings_window, padx=10)
-    frame_memory.grid(row=frame_row_idx, column=0, sticky="nsew")
-    memory_label = tk.Label(frame_memory, text="Memory", width=10, anchor='w')
-    memory_label.grid(row=0, column=0, padx=10, pady=5, sticky="w")
-    memory_var = tk.StringVar(value=loaded_settings['setting_ai_memory'])
-    for col_idx, option in enumerate(["off", "on", "force"]):
-        memory_radio = tk.Radiobutton(frame_memory, text=option, variable=memory_var, value=option, command=lambda: update_setting('setting_ai_memory', memory_var.get()))
-        memory_radio.grid(row=0, column=col_idx + 1, padx=5, pady=5, sticky="w")
-        memory_radio.configure(state = tk.DISABLED)  # Todo
-    frame_row_idx += 1
+    # # Memory settings
+    # frame_memory = tk.Frame(ai_settings_window, padx=10)
+    # frame_memory.grid(row=frame_row_idx, column=0, sticky="nsew")
+    # memory_label = tk.Label(frame_memory, text="Memory", width=10, anchor='w')
+    # memory_label.grid(row=0, column=0, padx=10, pady=5, sticky="w")
+    # memory_var = tk.StringVar(value=loaded_settings['setting_ai_memory'])
+    # for col_idx, option in enumerate(["off", "on", "force"]):
+    #     memory_radio = tk.Radiobutton(frame_memory, text=option, variable=memory_var, value=option, command=lambda: update_setting('setting_ai_memory', memory_var.get()))
+    #     memory_radio.grid(row=0, column=col_idx + 1, padx=5, pady=5, sticky="w")
+    #     memory_radio.configure(state = tk.DISABLED)  # Todo
+    # frame_row_idx += 1
 
     # # Image settings
     # frame_image = tk.Frame(ai_settings_window, padx=10)
@@ -3270,20 +3270,20 @@ def open_ai_settings():
     # frame_row_idx += 1
 
 
-    def erase_history():
-        # Implement the logic to erase history
-        print("History erased")
-        # For example:
-        # loaded_settings['history'] = ""
-        # save_settings()
+    # def erase_history():
+    #     # Implement the logic to erase history
+    #     print("History erased")
+    #     # For example:
+    #     # loaded_settings['history'] = ""
+    #     # save_settings()
         
-    # History settings
-    frame_history = tk.Frame(ai_settings_window, padx=10)
-    frame_history.grid(row=frame_row_idx, column=0, sticky="nsew")
-    history_label = tk.Label(frame_history, text="History", width=10, anchor='w')
-    history_label.grid(row=0, column=0, padx=10, pady=5, sticky="w")
-    erase_button = tk.Button(frame_history, text="Erase", command=erase_history)
-    erase_button.grid(row=0, column=1, padx=5, pady=5, sticky="w")
+    # # History settings
+    # frame_history = tk.Frame(ai_settings_window, padx=10)
+    # frame_history.grid(row=frame_row_idx, column=0, sticky="nsew")
+    # history_label = tk.Label(frame_history, text="History", width=10, anchor='w')
+    # history_label.grid(row=0, column=0, padx=10, pady=5, sticky="w")
+    # erase_button = tk.Button(frame_history, text="Erase", command=erase_history)
+    # erase_button.grid(row=0, column=1, padx=5, pady=5, sticky="w")
 
 def audio_callback(indata, frames, time, status):
     if status:
