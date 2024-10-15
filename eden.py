@@ -323,7 +323,7 @@ def open_char_setting(root_parent, callback):
 
         char_detail_window = tk.Toplevel(char_setting_window)
         char_detail_window.title(f"Char Setting : {char_name}")   
-        char_detail_window.geometry(f"840x700+{char_setting_window.winfo_x() + 50}+{char_setting_window.winfo_y() + 50}")
+        char_detail_window.geometry(f"840x640+{char_setting_window.winfo_x() + 50}+{char_setting_window.winfo_y() + 50}")
         char_detail_window.protocol("WM_DELETE_WINDOW", lambda: on_char_detail_window_close())
     
         frame_char_detail_window = tk.Frame(char_detail_window) # 반은 설정, 반은 애니메이션 용 cavnas
@@ -349,35 +349,36 @@ def open_char_setting(root_parent, callback):
             
         frame_ai = tk.Frame(frame_char_setting, padx=10)
         frame_ai.grid(row=frame_row_idx, column=0, sticky="nsew")
-        frame_char_setting.rowconfigure(frame_row_idx, minsize=60)
+        frame_char_setting.rowconfigure(frame_row_idx, minsize=40)
         frame_row_idx+=1
         char_name_var = tk.StringVar()
         char_name_var.set(char_name)
-        char_name_label = tk.Label(frame_ai, text="Name", width=12, anchor='w')
+        char_name_label = tk.Label(frame_ai, text="Setting Name", width=12, anchor='w')
         char_name_label.grid(row=0, column=0, padx=10, pady=2, sticky="w")
         char_name_entry = tk.Entry(frame_ai, width=20, textvariable=char_name_var)
         char_name_entry.grid(row=0, column=1, pady=5, sticky="w")
         char_name_button = tk.Button(frame_ai, text=get_message('Change'), command=lambda name=char_name: change_char_name(name), width=9)
         char_name_button.grid(row=0, column=2, padx=10, pady=2, sticky="e")
 
-        def update_setting_ai(event):
-            # 아직은 다른거 안 됨
-            if ai_dropdown.get() not in ['Local', 'API Test']:  # DP 기준
-                MessageBoxShowInfo(char_detail_window, "Cancel", "Current version only offers Local and API Test.")  
-                ai_dropdown.set('Local') 
-            char_info['ai_type'] = ai_options_dic_rev[ai_dropdown.get()] # 선택된 드롭다운 값에 해당하는 AI 내용물
-            refresh_ai_detail()
-            save_settings_eden(loaded_settings_eden)
-        ai_label = tk.Label(frame_ai, text="AI", width=12, anchor = 'w')
-        ai_label.grid(row=1, column=0, padx=10, pady=2, sticky="w")
-        ai_options = ['Local', 'API Test', 'ChatGPT']
-        ai_options_dp = ['Local', 'API Test', 'ChatGPT(WIP)']
-        ai_options_dic = dict(zip(ai_options, ai_options_dp))   
-        ai_options_dic_rev = dict(zip(ai_options_dp, ai_options))
-        ai_dropdown = ttk.Combobox(frame_ai, values=ai_options_dp, state="readonly", width=16)
-        ai_dropdown.set(ai_options_dic[char_info['ai_type']])
-        ai_dropdown.grid(row=1, column=1, padx=10, pady=2, sticky="w")
-        ai_dropdown.bind("<<ComboboxSelected>>", update_setting_ai)  # 드롭다운 선택 시 이벤트 바인딩
+        # def update_setting_ai(event):
+        #     # 아직은 다른거 안 됨
+        #     if ai_dropdown.get() not in ['Local', 'API Test']:  # DP 기준
+        #         # MessageBoxShowInfo(char_detail_window, "Cancel", "Current version only offers Local and API Test.")  
+        #         MessageBoxShowInfo(char_detail_window, "Cancel", "Current version only offers Local.")  
+        #         ai_dropdown.set('Local') 
+        #     char_info['ai_type'] = ai_options_dic_rev[ai_dropdown.get()] # 선택된 드롭다운 값에 해당하는 AI 내용물
+        #     refresh_ai_detail()
+        #     save_settings_eden(loaded_settings_eden)
+        # ai_label = tk.Label(frame_ai, text="AI", width=12, anchor = 'w')
+        # ai_label.grid(row=1, column=0, padx=10, pady=2, sticky="w")
+        # ai_options = ['Local', 'API Test', 'ChatGPT']
+        # ai_options_dp = ['Local', 'API Test', 'ChatGPT(WIP)']
+        # ai_options_dic = dict(zip(ai_options, ai_options_dp))   
+        # ai_options_dic_rev = dict(zip(ai_options_dp, ai_options))
+        # ai_dropdown = ttk.Combobox(frame_ai, values=ai_options_dp, state="readonly", width=16)
+        # ai_dropdown.set(ai_options_dic[char_info['ai_type']])
+        # ai_dropdown.grid(row=1, column=1, padx=10, pady=2, sticky="w")
+        # ai_dropdown.bind("<<ComboboxSelected>>", update_setting_ai)  # 드롭다운 선택 시 이벤트 바인딩
         
         def refresh_ai_detail():
             # frame_ai_gpt_detail.grid_forget()
@@ -386,7 +387,7 @@ def open_char_setting(root_parent, callback):
                 frame_ai_gpt_detail.grid(row=1, column=0, sticky="nsew")
             if char_info['ai_type'] == 'Local':
                 frame_ai_local_detail.grid(row=1, column=0, sticky="nsew")
-                char_detail_window.geometry("840x760")  # canvas 최대 크기 조절
+                char_detail_window.geometry("840x700")  # canvas 최대 크기 조절
         
         # 문자열 비교로 하위 폴더인지 확인해보기.
         def is_subdirectory(path, base):
@@ -429,52 +430,52 @@ def open_char_setting(root_parent, callback):
         ai_local_char_name_entry.pack(side="left", padx=(5, 0))
         ai_local_char_name_entry.bind("<KeyRelease>", update_ai_local_name)
         
-        frame_ai_local_model = tk.Frame(frame_ai_local_detail)
-        frame_ai_local_model.grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
-        ai_local_model_label = tk.Label(frame_ai_local_model, text="Model", width=8, anchor='w', justify='left')
-        ai_local_model_label.pack(side="left")
-        def update_ai_local_model(event=None):
-            char_info['local_model'] = ai_local_model_dropdown.get()
-            reset_ai_local_model_button()
-            save_settings_eden(loaded_settings_eden)
-        ai_local_model_options = [
-            "llama-3-neural-chat-v1-8b-Q4_K_M"
-            "lightblue-suzume-llama-3-8B-japanese-Q4_K_M"
-            , ""
-            ]  # "llama-2-7b-chat.Q4_K_M"
-        ai_local_model_dropdown = ttk.Combobox(frame_ai_local_model, values=ai_local_model_options, width=16)
-        ai_local_model_dropdown.set(char_info['local_model'])
-        ai_local_model_dropdown.pack(side="left", padx=(5, 0))
-        ai_local_model_dropdown.bind("<<ComboboxSelected>>", update_ai_local_model)  # 드롭다운 선택 시 이벤트 바인딩
+        # frame_ai_local_model = tk.Frame(frame_ai_local_detail)
+        # frame_ai_local_model.grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
+        # ai_local_model_label = tk.Label(frame_ai_local_model, text="Model", width=8, anchor='w', justify='left')
+        # ai_local_model_label.pack(side="left")
+        # def update_ai_local_model(event=None):
+        #     char_info['local_model'] = ai_local_model_dropdown.get()
+        #     reset_ai_local_model_button()
+        #     save_settings_eden(loaded_settings_eden)
+        # ai_local_model_options = [
+        #     "llama-3-neural-chat-v1-8b-Q4_K_M"
+        #     "lightblue-suzume-llama-3-8B-japanese-Q4_K_M"
+        #     , ""
+        #     ]  # "llama-2-7b-chat.Q4_K_M"
+        # ai_local_model_dropdown = ttk.Combobox(frame_ai_local_model, values=ai_local_model_options, width=16)
+        # ai_local_model_dropdown.set(char_info['local_model'])
+        # ai_local_model_dropdown.pack(side="left", padx=(5, 0))
+        # ai_local_model_dropdown.bind("<<ComboboxSelected>>", update_ai_local_model)  # 드롭다운 선택 시 이벤트 바인딩
         
-        def reset_ai_local_model_button():  # 해당 모델이 있는지 확인
-            if ai_local_model_dropdown.get():
-                local_model = str(ai_local_model_dropdown.get())
-                path = './local/' + local_model + '.gguf'
-                if os.path.exists(path):  # 이미 있음
-                    ai_local_model_button.configure(text=get_message("Exist"))
-                    ai_local_model_button["state"] = tk.DISABLED
-                else:
-                    ai_local_model_button.configure(text=get_message("Download"))        
-                    ai_local_model_button["state"] = tk.NORMAL
-            else:
-                ai_local_model_button.configure(text=get_message("Select"))        
-                ai_local_model_button["state"] = tk.DISABLED            
+        # def reset_ai_local_model_button():  # 해당 모델이 있는지 확인
+        #     if ai_local_model_dropdown.get():
+        #         local_model = str(ai_local_model_dropdown.get())
+        #         path = './local/' + local_model + '.gguf'
+        #         if os.path.exists(path):  # 이미 있음
+        #             ai_local_model_button.configure(text=get_message("Exist"))
+        #             ai_local_model_button["state"] = tk.DISABLED
+        #         else:
+        #             ai_local_model_button.configure(text=get_message("Download"))        
+        #             ai_local_model_button["state"] = tk.NORMAL
+        #     else:
+        #         ai_local_model_button.configure(text=get_message("Select"))        
+        #         ai_local_model_button["state"] = tk.DISABLED            
         
-        def download_ai_local_model():
-            url='https://huggingface.co/bartowski/llama-3-neural-chat-v1-8b-GGUF/resolve/main/'+str(ai_local_model_dropdown.get())+'.gguf'
-            ai_local_model_path = './local/' + str(ai_local_model_dropdown.get())+'.gguf'
-            download_from_url(frame_char_detail_window, url, ai_local_model_path)
+        # def download_ai_local_model():
+        #     url='https://huggingface.co/bartowski/llama-3-neural-chat-v1-8b-GGUF/resolve/main/'+str(ai_local_model_dropdown.get())+'.gguf'
+        #     ai_local_model_path = './local/' + str(ai_local_model_dropdown.get())+'.gguf'
+        #     download_from_url(frame_char_detail_window, url, ai_local_model_path)
             
-            # download 실행시 그냥 추가해버리자.
-            global is_downloading
-            if is_downloading:
-                ai_local_model_button.configure(text=get_message("Exist"))
-                ai_local_model_button["state"] = tk.DISABLED     
+        #     # download 실행시 그냥 추가해버리자.
+        #     global is_downloading
+        #     if is_downloading:
+        #         ai_local_model_button.configure(text=get_message("Exist"))
+        #         ai_local_model_button["state"] = tk.DISABLED     
                 
-        ai_local_model_button = tk.Button(frame_ai_local_model, text=get_message("Download"), width=9, command=download_ai_local_model)
-        ai_local_model_button.pack(side="right", padx=(15, 0))
-        reset_ai_local_model_button()
+        # ai_local_model_button = tk.Button(frame_ai_local_model, text=get_message("Download"), width=9, command=download_ai_local_model)
+        # ai_local_model_button.pack(side="right", padx=(15, 0))
+        # reset_ai_local_model_button()
 
         # Prompt 입력 프레임
         frame_ai_local_info = tk.Frame(frame_ai_local_detail)
@@ -507,19 +508,19 @@ def open_char_setting(root_parent, callback):
         # ai_local_export_button = tk.Button(frame_ai_local_import, text="Export", command=lambda: export_char_from_local(), width=9)
         # ai_local_export_button.grid(row=0, column=2, padx=4, pady=2, sticky="e")   
         
-        def update_ai_local_memory_len(e):
-            char_info['local_memory_len'] = int(ai_local_memory_len_slider.get())
-            save_settings_eden(loaded_settings_eden)
-        frame_ai_local_memory_len = tk.Frame(frame_ai_local_detail)
-        frame_ai_local_memory_len.grid(row=3, column=0, sticky="nsew", padx=10, pady=(0,5))    
-        ai_local_memory_len_label = tk.Label(frame_ai_local_memory_len, text="Memory", width=8, anchor='w', justify='left')
-        # ai_local_memory_len_label.grid(row=0, column=0, sticky="w")    
-        ai_local_memory_len_label.pack(side="left")
-        ai_local_memory_len_slider = tk.Scale(frame_ai_local_memory_len, from_=0, to=20, resolution=1, orient=tk.HORIZONTAL, length=280)
-        ai_local_memory_len_slider.pack(side="left", padx=(5, 0))
-        # ai_local_memory_len_slider.grid(row=0, column=1, sticky="w")
-        ai_local_memory_len_slider.set(char_info['local_memory_len'])
-        ai_local_memory_len_slider.bind("<ButtonRelease-1>", update_ai_local_memory_len)  # 슬라이더에서 손 땠을때 이벤트 동작하게
+        # def update_ai_local_memory_len(e):
+        #     char_info['local_memory_len'] = int(ai_local_memory_len_slider.get())
+        #     save_settings_eden(loaded_settings_eden)
+        # frame_ai_local_memory_len = tk.Frame(frame_ai_local_detail)
+        # frame_ai_local_memory_len.grid(row=3, column=0, sticky="nsew", padx=10, pady=(0,5))    
+        # ai_local_memory_len_label = tk.Label(frame_ai_local_memory_len, text="Memory", width=8, anchor='w', justify='left')
+        # # ai_local_memory_len_label.grid(row=0, column=0, sticky="w")    
+        # ai_local_memory_len_label.pack(side="left")
+        # ai_local_memory_len_slider = tk.Scale(frame_ai_local_memory_len, from_=0, to=20, resolution=1, orient=tk.HORIZONTAL, length=280)
+        # ai_local_memory_len_slider.pack(side="left", padx=(5, 0))
+        # # ai_local_memory_len_slider.grid(row=0, column=1, sticky="w")
+        # ai_local_memory_len_slider.set(char_info['local_memory_len'])
+        # ai_local_memory_len_slider.bind("<ButtonRelease-1>", update_ai_local_memory_len)  # 슬라이더에서 손 땠을때 이벤트 동작하게
         
         # def call_open_knowledge_screen(master):
         #     def update_ai_local_knowledge(knowledgelist):
@@ -639,7 +640,6 @@ def open_char_setting(root_parent, callback):
             first_png_file = os.path.join(dir, png_files[0])
             image = Image.open(first_png_file)
             root_idle_width, root_idle_height = image.size
-            print('a', root_idle_width, root_idle_height)
             image.close()
 
         # param 예시 : arona, idle_1
@@ -968,7 +968,7 @@ def open_char_setting(root_parent, callback):
         frame_char_animation = tk.Frame(frame_char_detail_window, padx=5) # 반은 설정, 반은 애니메이션 용 cavnas
         frame_char_animation.grid(row=0, column=1, sticky="nsw")
         canvas_char_animation = tk.Canvas(frame_char_animation, width=400, height=600, bg='#3366FF')  # 스크롤바가 있는 캔버스 생성
-        canvas_char_animation.grid(row=0, column=0, sticky="nsew", pady=(58,0))
+        canvas_char_animation.grid(row=0, column=0, sticky="nsew", pady=(38,0))
         canvas_char_animation_item = canvas_char_animation.create_image(200, 300, anchor=tk.CENTER)
             
         refresh_ai_detail()
@@ -1168,7 +1168,8 @@ def open_char_setting(root_parent, callback):
                         refresh_char_list()
                         save_settings_eden(loaded_settings_eden)
                     else:
-                        print('복사 대상의 정보가 불완전합니다.')            
+                        pass
+                        # print('복사 대상의 정보가 불완전합니다.')            
             char_copy_button = tk.Button(frame_char_button_sub, image=image_copy, command=lambda name=char_name: copy_char(name),
                                     width=button_length//4, height=button_length//4)
             char_copy_button.grid(row=0, column=2, sticky="we", padx=1)
