@@ -4,19 +4,20 @@ import prompt_main
 
 # 파일이름으로 가져오기
 def get_file_name():
-    file_name = './memory/conversation_memory.json'
+    file_name = 'conversation_memory.json'
     try:
         cur_conversation = ''
         with open('memory/history_meta.json', 'r', encoding='utf-8') as file:
             history_meta = json.load(file)
             if 'cur_conversation' in history_meta:
                 cur_conversation = history_meta['cur_conversation']
-            if 'conversations' in history_meta and cur_conversation in cur_conversation['conversations']:
-                file_name = cur_conversation['conversations'][cur_conversation]['filename']
+            if 'conversations' in history_meta and cur_conversation in history_meta['conversations']:
+                file_name = history_meta['conversations'][cur_conversation]['filename']
     except:
         # 파일이 없을 경우 기본값 설정
-        file_name = './memory/conversation_memory.json'
-    return file_name
+        file_name = 'conversation_memory.json'
+    os.makedirs('memory', exist_ok=True) 
+    return './memory/' + file_name
 
 def save_conversation_memory(speaker, message, message_trans=''):
     if not message_trans:

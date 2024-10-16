@@ -139,8 +139,9 @@ class HistoryScreen(tk.Toplevel):
         buttons_frame = tk.Frame(item_frame)
         buttons_frame.pack(side="right")
         
-        learning_button = tk.Button(buttons_frame, text=get_message("AI learning", self.language), command=lambda: self.learning_history_item(item, item_frame))
-        learning_button.pack(side="right", padx=5)   
+        # # 차후 기능 추가 : AI 학습을 통한 하이파메모리 개조
+        # learning_button = tk.Button(buttons_frame, text=get_message("AI learning", self.language), command=lambda: self.learning_history_item(item, item_frame))
+        # learning_button.pack(side="right", padx=5)   
         
         delete_button = tk.Button(buttons_frame, text=get_message("Delete", self.language), command=lambda: self.delete_history_item(item, item_frame))
         delete_button.pack(side="right", padx=5)   
@@ -187,8 +188,8 @@ class HistoryScreen(tk.Toplevel):
         if new_name:
             if item_name in self.history_options:
                 # json 갱신
-                index = self.loaded_history_meta['conversation_order'].index(item_name)
-                self.loaded_history_meta['conversation_order'][index] = new_name
+                # index = self.loaded_history_meta['conversation_order'].index(item_name)
+                # self.loaded_history_meta['conversation_order'][index] = new_name
                 
                 # 드롭다운 갱신
                 self.history_options = self.loaded_history_meta['conversation_order']
@@ -371,7 +372,8 @@ class HistoryScreen(tk.Toplevel):
             self.history_dropdown['values'] = self.history_options 
 
             # json 갱신
-            self.loaded_history_meta['conversation_order'] = self.history_options    
+            # self.loaded_history_meta['conversation_order'] = self.history_options    #### 이게뭐임  # 지금은 순서 뒤집기 없음
+            self.loaded_history_meta['conversation_order'].append(new_item_name)
             self.loaded_history_meta['cur_conversation'] = new_item_name
             self.loaded_history_meta['conversations'][new_item_name] = item
                         
@@ -380,7 +382,7 @@ class HistoryScreen(tk.Toplevel):
             
             # 변경내역 save
             save_history_meta(self.loaded_history_meta)
-        
+
 def main():
     root = tk.Tk()
     root.withdraw()
