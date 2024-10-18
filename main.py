@@ -2633,6 +2633,28 @@ def open_settings(e=None):
         chat_language_radio = tk.Radiobutton(chat_language_frame, text=chat_language, variable=chat_language_var, value=chat_language, command=update_chat_language)
         chat_language_radio.grid(row=0, column=0, sticky="we")
         HoverTip(chat_language_radio, "Chat response language\n(Questions can be asked in any language)")
+        
+    # Frame : Conversation > Web > Label, desc
+    frame_web = tk.Frame(frame_conversation)
+    frame_web.grid(row=3, column=0, sticky="we", pady=(2,0))
+    frame_web_label = tk.Frame(frame_web)
+    frame_web_label.grid(row=0, column=0, sticky="we")
+    frame_web_desc = tk.Frame(frame_web)
+    frame_web_desc.grid(row=0, column=1, sticky="we")
+
+    web_label = tk.Label(frame_web_label, text="W.Search", anchor='w', width=8)
+    web_label.grid(row=0, column=0, padx=5, sticky="w")
+    HoverTip(web_label, "Use Web search for chatting")
+    def update_setting(setting_key, value):
+        global loaded_settings
+        loaded_settings[setting_key] = value
+        save_settings(loaded_settings)
+    web_var = tk.StringVar(value=loaded_settings['setting_ai_web'])
+    for col_idx, option in enumerate(["off", "on", "force"]):
+        web_option_frame = tk.Frame(frame_web_desc)
+        web_option_frame.grid(row=0, column=col_idx, sticky="we", padx=20)
+        web_radio = tk.Radiobutton(web_option_frame, text=option, variable=web_var, value=option, command=lambda: update_setting('setting_ai_web', web_var.get()))
+        web_radio.grid(row=0, column=0, sticky="we")
 
     # def update_chat_click_sensitivity(value):
     #     loaded_settings['setting_chat_click_sensitivity'] = int(chat_click_sensitivity_slider.get())
@@ -3412,7 +3434,7 @@ def active_tikitaka():
         ai_singleton.release()  # 기존 GPU release
         llama_server = LlamaServer(use_gpu=True)
     llama_server.start()
-    
+ 
     def get_tikitaka_status_listener():
         global faster_whisper_listener, is_chatting, is_program_ended
         while not is_program_ended:
@@ -3437,7 +3459,16 @@ def active_tikitaka():
             lang = 'ja'
         elif loaded_settings['setting_chat_language'] == '한국어':
             lang = 'ko'
-        faster_whisper_listener = FasterWhisperListener(lang=lang, root=root, program_type=loaded_settings['setting_program_type'])
+        try:
+            faster_whisper_listener = FasterWhisperListener(lang=lang, root=root, program_type=loaded_settings['setting_program_type'])
+        except:
+            # 오류 대표상태 : 마이크가 꺼져있음
+            root.after(0, show_answer_balloon_simple, "Sensei? I can't start a conversation. Could you please check your microphone settings or something?")
+            if llama_server: # 서버 종료
+                llama_server.stop()
+                llama_server = None
+            
+            return
         root.after(0, show_answer_balloon_simple, "I'm ready to talk, sensei.")
         faster_whisper_listener.completion_url = llama_server.completion_url
         faster_whisper_listener.start_listen_event_loop() 
@@ -4381,7 +4412,13 @@ if __name__ == "__main__":
         loading_screen_thread.start()
         
     if loaded_settings['setting_program_type'] == 'GPU':
-        ai_singleton.get_llm()  # GPU 용 싱글톤 로드 (옵션 X)
+        # Preloading
+        # ai_singleton.get_llm()  # GPU 용 싱글톤 로드 (옵션 X)
+        loading_screen_text = "Loading ai_conversation..." + " (1/2)"
+        synthesize_char('korean', '안녕하세요', use_cuda=is_use_cuda, type='single', sid=0)
+        loading_screen_text = "Loading ai_voices..." + " (2/2)"
+        for j, reply_list in enumerate(ai_conversation.process_stream('안녕?', 'sensei', 'arona', True, False)):
+            pass
     else:
         load_models()  # 모델과 쓰레드 로드
     
@@ -4465,9 +4502,9 @@ if __name__ == "__main__":
     # 우클릭 메뉴 생성
     menu = tk.Menu(root, tearoff=0)
     menu.add_command(label=get_message_ui("Char Change"), command=lambda root=root: call_open_char_setting(root))
-    menu.add_separator()  
+    # menu.add_separator()  
     menu.add_command(label=get_message_ui("Setting"), command=open_settings)
-    menu.add_command(label=get_message_ui("AI Setting"), command=open_ai_settings)
+    # menu.add_command(label=get_message_ui("AI Setting"), command=open_ai_settings)
     menu.add_separator()  
     menu.add_command(label=get_message_ui("Idle"), command=lambda: set_status("idle"))
     menu.add_command(label=get_message_ui("Idle Talk"), command=lambda: active_trigger("idle"))
