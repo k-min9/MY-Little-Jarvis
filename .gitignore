@@ -39,3 +39,4 @@ voice_management_jp.py
 /voices_jp
 /dict
 server_log_*.txt
+server_test.py
