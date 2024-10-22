@@ -1,6 +1,6 @@
 import requests
 import os, shutil
-from time import time
+import time
 
 from PIL import Image
 from ai_singleton import get_vision_model, get_vision_processor
