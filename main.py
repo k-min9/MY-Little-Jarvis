@@ -1260,12 +1260,10 @@ class AnswerBalloonSimple(tk.Toplevel):
         self.canvas.bind("<B1-Motion>", self.on_drag)
         self.canvas.bind("<Double-Button-1>", self.on_double_click)
 
-        result_ko = translator_google.translate(text, dest='ko').text        
-        result_ko = change_to_ko(result_ko)
-        result_jp = translator_google.translate(text, dest='ja').text
-        result_jp = change_to_jp(result_jp)
+        # 자동 종료
+        result_ko = getMessage(text, 'ko', False)
         audio = os.path.abspath('.').replace('\\','/') +'/' + synthesize_char('korean', result_ko, use_cuda=is_use_cuda, type='single', sid=0)
-        sound_length = play_wav(audio, loaded_settings['setting_volume'])
+        sound_length = get_wav_length(audio)
         self.after(int(sound_length*1000)+800, self.kill_balloon)
         
     def create_text(self, text):
@@ -3005,11 +3003,12 @@ def open_settings(e=None):
         update_anim()
     size_label = tk.Label(frame_size, text="Size", width=6)
     size_label.grid(row=0, column=0, padx=10, sticky="w")
+    HoverTip(size_label, "Use Web search for chatting")
     size_slider = Scale(frame_size, from_=0.2, to=2, resolution=0.1, orient=tk.HORIZONTAL) #, command=update_size)
     size_slider.set(loaded_settings['setting_size'])  
     size_slider.grid(row=0, column=1, padx=10, sticky="w")
     size_slider.bind("<ButtonRelease-1>", update_size)  # 슬라이더에서 손 땠을때 이벤트 동작하게
-    
+
     # def update_size_effecter(value):
     #     loaded_settings['setting_size_effecter'] = float(size_effecter_slider.get())
     #     # if size_effecter_slider.get() <= 0:  # show Value False하고 label 일일히 update 칠거면 이걸로
@@ -3132,14 +3131,18 @@ def open_settings(e=None):
     # history_initalize_button = tk.Button(frame_history_desc, text=get_message('Initialize'), command=lambda: initialize_history_folder(), width=9)
     # history_initalize_button.grid(row=0, column=2, padx=10, pady=2, sticky="e")
 
+# wav 길이 반환
+def get_wav_length(file_path):
+    sound = pygame.mixer.Sound(file_path)
+    return sound.get_length()
+
 # wav재생
 def play_wav(file_path, volume=100):
-    global is_program_ended, global_sound
+    global is_program_ended, global_sound, loaded_settings
     sound = pygame.mixer.Sound(file_path)
     global_sound = sound
     sound.set_volume(volume/100)
     sound_length = sound.get_length()
-
 
     if not loaded_settings:
         sound.play()
@@ -3412,7 +3415,8 @@ def deactive_focus():
 
     is_focus = False
     
-    MessageBoxShowInfo(root, 'Info', "Focus mode Deactivated")
+    # MessageBoxShowInfo(root, 'Info', "Focus mode Deactivated")
+    root.after(0, show_answer_balloon_simple, "I'll turn off focus mode, sensei!")
 
 # 티키타카
 def active_tikitaka():
@@ -3480,7 +3484,15 @@ def active_tikitaka():
     tikitaka_status_thread.start()
     
 def show_answer_balloon_simple(text):
+    global loaded_settings, is_use_cuda
+    
     AnswerBalloonSimple(text)
+    
+    # 안내 음성
+    result_ko = getMessage(text, 'ko', False)
+    audio = os.path.abspath('.').replace('\\','/') +'/' + synthesize_char('korean', result_ko, use_cuda=is_use_cuda, type='single', sid=0)
+    # play_wav_queue_add(audio)
+    play_wav(audio)
 
 def on_click(event=None):
     global is_dragging, is_chatting, chat_window

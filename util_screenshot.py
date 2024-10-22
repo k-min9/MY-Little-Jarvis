@@ -9,6 +9,8 @@ import shutil
 from screeninfo import get_monitors
 import state
 
+from message_ui import get_message_ui
+
 class ScreenshotApp:
     def __init__(self, root, menu=None):
         self.root = root
@@ -101,7 +103,7 @@ class ScreenshotApp:
             if file_path:
                 self.save_screenshot(file_path)
         else:
-            messagebox.showwarning("Warning", "Please set the screenshot area first.")
+            messagebox.showwarning(get_message_ui("Info"), get_message_ui("Please set the screenshot area first."))
 
     def copy_to_clipboard(self):
         if self.screenshot_rect:
@@ -112,11 +114,11 @@ class ScreenshotApp:
             self.root.clipboard_clear()
             self.root.clipboard_append(image)
         else:
-            messagebox.showwarning("Warning", "Please set the screenshot area first.")
+            messagebox.showwarning(get_message_ui("Info"), get_message_ui("Please set the screenshot area first."))
 
     def save_screenshot(self, file_path='./image/screenshot.png'):
         if not self.screenshot_rect:
-            messagebox.showwarning("Warning", "Please set the screenshot area first.")
+            messagebox.showwarning(get_message_ui("Info"), get_message_ui("Please set the screenshot area first."))
             return
         if not os.path.exists("./image"):
             os.makedirs("./image")
@@ -138,7 +140,7 @@ class ScreenshotApp:
                 if state.get_is_screenshot_area_selecting():
                     messagebox.showwarning("Warning", "Selecting screenshot area...")
                 else:
-                    messagebox.showwarning("Warning", "Please set the screenshot area first.")
+                    messagebox.showwarning(get_message_ui("Info"), get_message_ui("Please set the screenshot area first."))
                     self.set_screenshot_area()
                 return 'No'
             else:
