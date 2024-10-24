@@ -1086,12 +1086,12 @@ def open_char_setting(root_parent, callback):
                     return False
         
                 text = "["+name+get_message("] : Change Character")
-                if not check_ai():
-                    text = text + get_message("\nNo 'AI' is set up.")
-                if not check_animation():
-                    text = text + get_message("\nNo 'Animation assets' is set up.")
-                if not check_voice():
-                    text = text + get_message("\nNo 'Voice' is set up.")
+                # if not check_ai():
+                #     text = text + get_message("\nNo 'AI' is set up.")
+                # if not check_animation():
+                #     text = text + get_message("\nNo 'Animation assets' is set up.")
+                # if not check_voice():
+                #     text = text + get_message("\nNo 'Voice' is set up.")
                 
                 ask_question_box = MessageBoxAskQuestion(char_setting_window,"Info", text)
                 char_setting_window.wait_window(ask_question_box)
