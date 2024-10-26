@@ -91,8 +91,8 @@ class historyDetailScreen(tk.Toplevel):
         self.add_btn = tk.Button(self.control_frame, text=get_message("Add", self.language), command=self.add_line_window)
         self.add_btn.grid(row=0, column=0, sticky="ew", pady=2)
 
-        self.delete_btn = tk.Button(self.control_frame, text=get_message("Del", self.language), command=self.delete_line)
-        self.delete_btn.grid(row=1, column=0, sticky="ew", pady=2)
+        # self.delete_btn = tk.Button(self.control_frame, text=get_message("Del", self.language), command=self.delete_line)
+        # self.delete_btn.grid(row=1, column=0, sticky="ew", pady=2)
 
         self.summary_btn = tk.Button(self.control_frame, text=get_message("Summary", self.language), command=self.summary_title)
         self.summary_btn.grid(row=1, column=0, sticky="ew", pady=2)
@@ -118,6 +118,21 @@ class historyDetailScreen(tk.Toplevel):
         with open(self.file_name, 'w', encoding='utf-8') as file:
             json.dump(self.history_content_list, file, ensure_ascii=False, indent=4)
 
+    def refresh_history_detail_ui(self):
+        # 기존 프레임 삭제
+        for frame in self.frames:
+            frame.destroy()
+        self.frames.clear()
+        
+        # 최신 데이터를 다시 로드
+        self.history_content_list = load_history_content(self.file_name)
+        
+        # 새 데이터를 기반으로 UI 업데이트
+        self.import_data_init(self.history_content_list)
+        
+        # 스크롤 영역을 재설정
+        # self.on_frame_configure(None)
+
     def add_line_window(self):
         def add_line_window_confirm(self, speaker_entry, content_text):
             if not speaker_entry.get():
@@ -126,7 +141,15 @@ class historyDetailScreen(tk.Toplevel):
                 return
             new_idx = len(self.history_content_list)
             new_frame = self.add_line(new_idx)
-            self.update_line(speaker_entry, content_text, new_frame)  # ui 업데이트
+            self.update_line(speaker_entry, content_text, new_frame, new_idx)  # ui 업데이트
+            # 내용 추가
+            speaker = speaker_entry.get()
+            content = content_text.get("1.0", "end-1c")
+            new_content = dict()
+            new_content['speaker'] = speaker
+            new_content['message'] = content
+            new_content['message_trans'] = content
+            self.history_content_list.append(new_content)  
             self.save_history_detail()  # history_detail json 저장
             add_window.destroy()
         add_window = tk.Toplevel(self)
@@ -166,7 +189,7 @@ class historyDetailScreen(tk.Toplevel):
         content_label.grid(row=0, column=2, padx=(0, 10), sticky="w")
         modify_button = tk.Button(new_frame, text=get_message("Edit", self.language), command=lambda: self.modify_line_window(new_frame, title_label, content_label, idx))
         modify_button.grid(row=0, column=3, padx=(0, 10), sticky="w")
-        delete_button = tk.Button(new_frame, text=get_message("Del", self.language), command=lambda: self.delete_specific_line(new_frame))
+        delete_button = tk.Button(new_frame, text=get_message("Del", self.language), command=lambda: self.delete_specific_line(new_frame, idx))
         delete_button.grid(row=0, column=4, sticky="w")
 
         self.frames.append(new_frame)
@@ -180,19 +203,10 @@ class historyDetailScreen(tk.Toplevel):
             self.frames.pop()
 
     # 특정 idx번째 frame 삭제
-    def delete_specific_line(self, frame):
-        # dic 정리
-        speaker = frame.winfo_children()[1].cget("text")
-        if speaker in self.history_detail_dict:
-            del self.history_detail_dict[speaker]
-            file_path = self.file_name
-            if not os.path.exists(os.path.dirname(file_path)):
-                os.makedirs(os.path.dirname(file_path))
-            with open(file_path, 'w', encoding='utf-8') as file:
-                json.dump(self.history_detail_dict, file, indent=4)
-
-        frame.destroy()
-        self.frames.remove(frame)
+    def delete_specific_line(self, frame, idx):
+        del self.history_content_list[idx]  # 기존 list의 idx 번째 회화 삭제
+        self.save_history_detail()  # 변경내용 포함 저장
+        self.refresh_history_detail_ui()  # ui 갱신
         
     def summary_title(self):
         ask_question_box = MessageBoxAskQuestion(self, "Confirm", "Suggest title suggestions from conversation history.")
@@ -331,13 +345,23 @@ class historyDetailScreen(tk.Toplevel):
             
     def modify_line_window(self, frame, title_label, content_label, idx):
         def modify_line_window_confirm(self, speaker_entry, content_text, frame, idx):
-            self.update_line(speaker_entry, content_text, frame, idx)
+            # 내용 추가
+            speaker = speaker_entry.get()
+            content = content_text.get("1.0", "end-1c")
+            new_content = dict()
+            new_content['speaker'] = speaker
+            new_content['message'] = content
+            new_content['message_trans'] = content
+            print('new_content', new_content)
+            # 내용 update
+            self.history_content_list[idx] = new_content
+            self.save_history_detail()  # 변경내용 포함 저장            
+            self.update_line(speaker_entry, content_text, frame, idx) # ui 갱신
             modify_window.destroy()
         speaker = title_label.cget("text")
         content = ''
         try:
             content = self.history_content_list[idx]['message_trans']
-            print('out of idx : ', idx)
         except:
             pass
         modify_window = tk.Toplevel(self)
@@ -364,7 +388,7 @@ class historyDetailScreen(tk.Toplevel):
         confirm_button.pack(side="right",padx=2)
 
 
-    def update_line(self, speaker_entry, content_text, frame):
+    def update_line(self, speaker_entry, content_text, frame, idx):
         speaker = speaker_entry.get()
         content = content_text.get("1.0", "end-1c")[:20] + "..." if len(content_text.get("1.0", "end-1c")) > 20 else content_text.get("1.0", "end-1c")  # 20글자까지 표기
         content = content.replace('\n',' ')
@@ -378,9 +402,9 @@ class historyDetailScreen(tk.Toplevel):
         title_label.grid(row=0, column=1, padx=(0, 10), sticky="w")
         content_label = tk.Label(frame, text=content, width=20, anchor="w", justify='left')
         content_label.grid(row=0, column=2, padx=(0, 10), sticky="w")
-        modify_button = tk.Button(frame, text=get_message("Edit", self.language), command=lambda: self.modify_line_window(frame, title_label, content_label, 0))
+        modify_button = tk.Button(frame, text=get_message("Edit", self.language), command=lambda: self.modify_line_window(frame, title_label, content_label, idx))
         modify_button.grid(row=0, column=3, padx=(0, 10), sticky="w")
-        delete_button = tk.Button(frame, text=get_message("Del", self.language), command=lambda: self.delete_specific_line(frame))
+        delete_button = tk.Button(frame, text=get_message("Del", self.language), command=lambda: self.delete_specific_line(frame, idx))
         delete_button.grid(row=0, column=4, sticky="w")
 
     
