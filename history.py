@@ -159,6 +159,34 @@ class HistoryScreen(tk.Toplevel):
         # print(f"Open details for {item['title']}")
         history_detail.open_history_detail_screen(self, item, None)
 
+    # json을 읽어 새로 ui refresh
+    def refresh_history_screen_ui(self):
+        # history_meta.json 파일을 새로 로드
+        self.loaded_history_meta = load_history_meta()
+
+        # 기존 UI 요소들을 삭제
+        for frame in self.history_frames:
+            frame.destroy()
+        self.history_frames.clear()
+
+        # 드롭다운 메뉴 옵션 갱신
+        self.history_options.clear()
+        for conversation in self.loaded_history_meta['conversation_order']:
+            self.history_options.append(self.loaded_history_meta['conversations'][conversation]['title'])
+        self.history_dropdown['values'] = self.history_options
+        self.history_var.set(self.loaded_history_meta['cur_conversation'])
+
+        # 새로운 history_order와 history_items에 따라 UI 재구성
+        self.history_order = self.loaded_history_meta['conversation_order']
+        self.history_items = self.loaded_history_meta['conversations']
+        
+        # 최신 데이터에 따라 history item을 다시 추가
+        for history in self.history_order:
+            if history in self.history_items:
+                history_dict = self.history_items[history]
+                if 'filename' in history_dict and os.path.isfile('./memory/' + history_dict['filename']):
+                    self.add_history_item(history_dict)
+
     def modify_history_item(self, item, item_label):
         modify_window = tk.Toplevel(self)
         modify_window.title("Modify History Item")
@@ -187,20 +215,31 @@ class HistoryScreen(tk.Toplevel):
         new_name = title_entry.get()
         if new_name:
             if item_name in self.history_options:
+                # history 갱신
+                try:                    
+                    self.loaded_history_meta['conversations'][item['time']]['title'] = new_name
+                    save_history_meta(self.loaded_history_meta)
+                except:
+                    pass
+                
+                
                 # json 갱신
                 # index = self.loaded_history_meta['conversation_order'].index(item_name)
                 # self.loaded_history_meta['conversation_order'][index] = new_name
                 
                 # 드롭다운 갱신
-                self.history_options = self.loaded_history_meta['conversation_order']
-                self.history_dropdown['values'] = self.history_options
+                # self.history_options = self.loaded_history_meta['conversation_order']
+                # self.history_dropdown['values'] = self.history_options
                 
-                if item_name == self.loaded_history_meta['cur_conversation']:
-                    self.loaded_history_meta['cur_conversation'] = new_name
-                    self.history_var.set(new_name)
+                # if item_name == self.loaded_history_meta['cur_conversation']:
+                #     self.loaded_history_meta['cur_conversation'] = new_name
+                #     self.history_var.set(new_name)
                     
                 # 변경내역 save
                 save_history_meta(self.loaded_history_meta)
+                
+                # ui 갱신
+                self.refresh_history_screen_ui()
 
             item_label.config(text=new_name)
         modify_window.destroy()
