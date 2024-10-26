@@ -67,6 +67,10 @@ class HistoryScreen(tk.Toplevel):
                
         # 기본 세팅
         self.loaded_history_meta = load_history_meta()
+        self.conversations_dict_title_to_time = dict()
+        if 'conversations' in self.loaded_history_meta:
+            for key, value in self.loaded_history_meta['conversations'].items():
+                self.conversations_dict_title_to_time[value['title']] = value['time']
         self.language = state.get_g_language()
         self.translator = None
         try:
@@ -81,14 +85,19 @@ class HistoryScreen(tk.Toplevel):
         self.current_history_label = tk.Label(self.current_history_frame, text=get_message("Current Chat", self.language))
         self.current_history_label.pack(side=tk.LEFT, padx=5)
         
+        # cur_conversation(time)을 update
         def update_history_dropdown(event):
-            self.loaded_history_meta['cur_conversation'] = self.history_dropdown.get()
+            value = self.history_dropdown.get()
+            if value in self.conversations_dict_title_to_time:
+                value = self.conversations_dict_title_to_time[value]
+            self.loaded_history_meta['cur_conversation'] = value
             save_history_meta(self.loaded_history_meta)
             
         self.history_options = list()  # dropdown option : 이름으로
         for conversation in self.loaded_history_meta['conversation_order']:
-            self.history_options.append(self.loaded_history_meta['conversations'][conversation]['title'])              
-        self.history_var = tk.StringVar(value=self.loaded_history_meta['cur_conversation'])
+            self.history_options.append(self.loaded_history_meta['conversations'][conversation]['title'])          
+        history_options_val = self.loaded_history_meta['conversations'][self.loaded_history_meta['cur_conversation']]['title']
+        self.history_var = tk.StringVar(value=history_options_val)
         self.history_dropdown = ttk.Combobox(self.current_history_frame, textvariable=self.history_var, state="readonly")
         self.history_dropdown['values'] = self.history_options
         self.history_dropdown.pack(side=tk.LEFT)
@@ -163,6 +172,10 @@ class HistoryScreen(tk.Toplevel):
     def refresh_history_screen_ui(self):
         # history_meta.json 파일을 새로 로드
         self.loaded_history_meta = load_history_meta()
+        self.conversations_dict_title_to_time = dict()
+        if 'conversations' in self.loaded_history_meta:
+            for key, value in self.loaded_history_meta['conversations'].items():
+                self.conversations_dict_title_to_time[value['title']] = value['time']
 
         # 기존 UI 요소들을 삭제
         for frame in self.history_frames:
@@ -174,7 +187,7 @@ class HistoryScreen(tk.Toplevel):
         for conversation in self.loaded_history_meta['conversation_order']:
             self.history_options.append(self.loaded_history_meta['conversations'][conversation]['title'])
         self.history_dropdown['values'] = self.history_options
-        self.history_var.set(self.loaded_history_meta['cur_conversation'])
+        self.history_var.set(self.loaded_history_meta['conversations'][self.loaded_history_meta['cur_conversation']]['title'])
 
         # 새로운 history_order와 history_items에 따라 UI 재구성
         self.history_order = self.loaded_history_meta['conversation_order']
@@ -221,27 +234,13 @@ class HistoryScreen(tk.Toplevel):
                     save_history_meta(self.loaded_history_meta)
                 except:
                     pass
-                
-                
-                # json 갱신
-                # index = self.loaded_history_meta['conversation_order'].index(item_name)
-                # self.loaded_history_meta['conversation_order'][index] = new_name
-                
-                # 드롭다운 갱신
-                # self.history_options = self.loaded_history_meta['conversation_order']
-                # self.history_dropdown['values'] = self.history_options
-                
-                # if item_name == self.loaded_history_meta['cur_conversation']:
-                #     self.loaded_history_meta['cur_conversation'] = new_name
-                #     self.history_var.set(new_name)
-                    
+
                 # 변경내역 save
                 save_history_meta(self.loaded_history_meta)
                 
                 # ui 갱신
                 self.refresh_history_screen_ui()
 
-            item_label.config(text=new_name)
         modify_window.destroy()
 
     def delete_history_item(self, item, item_frame):

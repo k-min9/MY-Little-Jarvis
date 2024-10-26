@@ -61,6 +61,7 @@ class historyDetailScreen(tk.Toplevel):
         except:
             pass
         
+        self.master = master
         self.item = item
         self.item_key = item['time']
         self.file_name = 'memory/' + item['filename']
@@ -229,6 +230,10 @@ class historyDetailScreen(tk.Toplevel):
                     print('change memory/history_meta.json')
                 except:
                     pass
+                
+                # refresh_ui
+                self.master.refresh_history_screen_ui()
+                
         
     def summary_title_stream(self):
         import ai_title
