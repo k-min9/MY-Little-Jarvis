@@ -499,7 +499,7 @@ def custom_generate_reply(question, original_question, seed, state, stopping_str
             except Exception as exc:
                 exception_message = str(exc)
                 reply += f"The search tool encountered an error: {exception_message}"
-                # print(f'LLM_Web_search | {search_term} generated an exception: {exception_message}')
+                print(f'LLM_Web_search | {search_term} generated an exception: {exception_message}')
             else:
                 if search_results != "":
                     reply += search_results
@@ -516,14 +516,14 @@ def custom_generate_reply(question, original_question, seed, state, stopping_str
             original_model_reply = reply
             read_webpage = True
             url = open_url_re_match.group(1)
-            # print(f"LLM_Web_search | Reading {url}")
+            print(f"LLM_Web_search | Reading {url}")
             reply += "\n```plaintext"
             reply += "\nURL opener tool:\n"
             try:
                 webpage_content = get_webpage_content(url)
             except Exception as exc:
                 reply += f"Couldn't open {url}. Error message: {str(exc)}"
-                # print(f'LLM_Web_search | {url} generated an exception: {str(exc)}')
+                print(f'LLM_Web_search | {url} generated an exception: {str(exc)}')
             else:
                 reply += f"\nText content of {url}:\n"
                 reply += webpage_content
@@ -740,5 +740,5 @@ if __name__ == "__main__":
     for j, reply_list in enumerate(process(question)):
         if last_reply_len < len(reply_list):
             last_reply_len = len(reply_list)
-            # print('reply_list', reply_list)
-    # print('reply_list', reply_list)
+            print('reply_list', reply_list)
+    print('reply_list', reply_list)
