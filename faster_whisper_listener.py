@@ -187,6 +187,9 @@ class FasterWhisperListener:
                             if '<|im' in processed_sentence:
                                 processed_sentence = processed_sentence.split('<|im')[0]
                                 self.processing = False
+                            
+                            if not processed_sentence:  # _process_sentence가 None을 return 할 경우
+                                processed_sentence = ''
                                 
                             result_jp = translator_Google.translate(processed_sentence, dest='ja').text
                             result_ko = translator_Google.translate(processed_sentence, dest='ko').text
