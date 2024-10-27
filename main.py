@@ -3456,7 +3456,7 @@ def active_tikitaka():
                 time.sleep(2)
 
     def start_tikitaka_listener():
-        global faster_whisper_listener
+        global faster_whisper_listener, llama_server
         from faster_whisper_listener import FasterWhisperListener
         lang = 'en'
         if loaded_settings['setting_chat_language'] == '日本語':
