@@ -245,25 +245,58 @@ class HistoryScreen(tk.Toplevel):
 
     def delete_history_item(self, item, item_frame):
         item_name = item['title']
+        item_key = item['time']
         ask_question_box = MessageBoxAskQuestion(self, "Confirm", "Do you really want to delete it?")
         self.wait_window(ask_question_box)
         if ask_question_box.result:  
-            if item_name in self.history_options:
-                # 드롭다운 갱신
-                self.history_options.remove(item_name)
-                self.history_dropdown['values'] = self.history_options
-            
-                # json 갱신
-                self.loaded_history_meta['conversation_order'] = self.history_options           
-                if item_name == self.loaded_history_meta['cur_conversation']:
-                    self.loaded_history_meta['cur_conversation'] = ''
-                    self.history_var.set('')
+            # json 갱신
+            self.loaded_history_meta['conversation_order'].remove(item_key)
+            # TODO : conversations에 해당 key가 없을 경우 제거(안전성/영향도 체크)
+            # if 'conversations' in self.loaded_history_meta:
+            #     keys_to_delete = []
+            #     for key in self.loaded_history_meta['conversations'].keys():
+            #         if key not in self.loaded_history_meta['conversation_order']:
+            #             keys_to_delete.append(key)
                 
-                # 변경내역 save
-                save_history_meta(self.loaded_history_meta)
+            #     for key in keys_to_delete:
+            #         del self.loaded_history_meta['conversations'][key]
 
-            item_frame.destroy()
-            self.history_frames.remove(item_frame)
+            if item_name == self.loaded_history_meta['cur_conversation']: # 삭제대화가 현재 대화
+                if len(self.loaded_history_meta['conversation_order']) == 0: # 남은 대화가 없을 경우 신규 대화
+                    item_new = dict()
+
+                    new_item_name = datetime.now().strftime("%Y%m%d%H%M%S")
+                    item_new['title'] = new_item_name
+                    item_new['time'] = new_item_name
+                    item_new['filename'] = 'conversation_' + new_item_name + '.json'
+                    
+                    # 설정을 JSON 형식으로 저장
+                    os.makedirs('./memory', exist_ok=True)
+                    with open('memory/'+item_new['filename'], 'w', encoding='utf-8') as file:
+                        json.dump([], file, ensure_ascii=False, indent=4)
+
+                    # 변수 갱신 및 드롭다운 추가
+                    # self.history_var.set(new_item_name) 
+                    self.history_options.append(new_item_name)
+                    self.history_dropdown['values'] = self.history_options 
+
+                    # json 갱신
+                    self.loaded_history_meta['conversation_order'].append(new_item_name)
+                    self.loaded_history_meta['cur_conversation'] = new_item_name
+                    self.loaded_history_meta['conversations'][new_item_name] = item_new
+                    
+                # 최초의 대화로 세팅
+                self.loaded_history_meta['cur_conversation'] = self.loaded_history_meta['conversation_order'][0]
+                history_options_val = self.loaded_history_meta['conversations'][self.loaded_history_meta['cur_conversation']]['title']
+                self.history_var.set(history_options_val)
+                
+            # 변경내역 save
+            save_history_meta(self.loaded_history_meta)
+            
+            # ui 갱신
+            self.refresh_history_screen_ui()
+
+            # item_frame.destroy()
 
     def learning_history_item(self, item, item_frame):
         ask_question_box = MessageBoxAskQuestion(self, "Confirm", "Analyze the information to learn from the conversation history.")
@@ -410,7 +443,6 @@ class HistoryScreen(tk.Toplevel):
             self.history_dropdown['values'] = self.history_options 
 
             # json 갱신
-            # self.loaded_history_meta['conversation_order'] = self.history_options    #### 이게뭐임  # 지금은 순서 뒤집기 없음
             self.loaded_history_meta['conversation_order'].append(new_item_name)
             self.loaded_history_meta['cur_conversation'] = new_item_name
             self.loaded_history_meta['conversations'][new_item_name] = item
