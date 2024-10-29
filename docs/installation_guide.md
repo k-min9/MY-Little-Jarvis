@@ -90,6 +90,16 @@ MY-Little-JARVIS는 exe 형태의 Product 상태로 배포되어 바로 사용�
 
     ```
 
+- 필요 모델 다운로드
+  - 프로젝트 최상위에 model폴더를 만들고, 다운로드 받은 모델을 넣어주세요
+    - 추천 모델
+      - [bartowski/Meta-Llama-3.1-8B-Instruct-GGUF](https://huggingface.co/bartowski/Meta-Llama-3.1-8B-Instruct-GGUF)
+      - [onnx-community/silero-vad](https://huggingface.co/onnx-community/silero-vad)
+    - 이하 모델은 프로젝트에서 관련 기능 최초 기동시 Local로 다운로드합니다.
+      - [sentence-transformers/all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
+      - [microsoft/Florence-2-base](https://huggingface.co/microsoft/Florence-2-base)
+      - [Systran/faster-whisper-small](https://huggingface.co/Systran/faster-whisper-small)
+
 - pyinstaller로 프로젝트를 패키징할 수 있습니다.
 
     ``` bash
