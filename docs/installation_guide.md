@@ -41,6 +41,7 @@ MY-Little-JARVIS는 exe 형태의 Product 상태로 배포되어 바로 사용�
     # 일반 library
     pip install pyinstaller
     pip install googletrans==4.0.0-rc1
+    pip install deepl
     pip install tkinterdnd2 # tkinter 보조로 drag and drop 등의 외부 입력 받음
     pip install pyaudio
     pip install keyboard

@@ -4,18 +4,7 @@
 
 ## Installer Download : release or <https://shorturl.at/QrFmp>
 
-- Installer 명세
-  - 개요 : python 설치, version, venv, gmake, gpu 설정 등 복잡한 설정 없이 원클릭 Install 파일 지원
-  ![installer](docs_image/installer1.png)
-  - 설치방법
-    1. 위에서 Download하신 Installer.exe를 실행해주세요.
-       - 실행한 프로그램 우측 하단의 Install을 클릭하시면 Installer.exe 위치에 바로 설치됩니다. (설치할 위치나 언어를 변경할 수 있습니다.)
-    2. 설치가 완료되었다는 안내메시지가 뜨면 확인을 눌러 종료해주세요.
-    3. Done! 설치된 폴더에 있는 Jarvis.exe를 실행해주세요.
-- 프로그램 명세
-  - 구동환경 : Windows
-  - 용량 : 13.2GB
-  - 지원언어 : 한국어/English/日本語
+[빠른 설치 가이드](docs/installation_guide.md)
 
 ## 개요
 
@@ -59,19 +48,23 @@
 
 ## 차별점 : Why JARVIS?
 
-Closed AI가 높은 편의성
+Closed AI가 높은 편의성과 성능을 가지고 그에 맞는 환경과 비용이 필요하다면, MY-Little-JARVIS는 높은 확장성과 생태계를 바탕으로 최적화된 리소스 만으로 운용 가능합니다.
 
 | **차이점**           | **Closed AI(GPT, Claude...)**                  | **Open Source(My Little Jarvis)**          |
 |----------------------|-----------------------------------------------|-----------------------------------------------|
 | **생태계**           | 대기업 위주                                    | 오픈소스.                                     |
 | **기술 공유**         | 대기업 중심의 관리                               | 개발자 및 사용자 중심의 대규모 글로벌 커뮤니티   |
 | **비용**             | 클라우드 기반, 종량제 요금제 사용.비쌈.            | 로컬 기반(+클라우드 지원), 무료.            |
-| **보안**             | 데이터가 서버로 전송될 수 있음                | 데이터가 외부로 전송되지 않음                 |
+| **보안**             | 데이터가 서버로 전송될 수 있음                 | 데이터가 외부로 전송되지 않음                   |
 | **컨트롤 자유도**    | 설정된 파라미터 내에서 이용                      | 개발자가 파라미터 설정 가능                   |
 | **인터넷 연결**      | 인터넷 필수, 서버에 의존                          | 인터넷 없이 오프라인으로 작동 가능               |
-| **확장성**           | API로 확장 가능, 제한된 커스터마이징               | 오픈소스라 다양한 기능 확장 및 모듈 추가 가능    |
-| **모델**             | 고정된 클라우드 모델 사용, 주어진 선택지에서 선택   | 다양한 모델을 직접 소유하고 경량화하거나 개조할 수 있음   |
+| **서버 효율**           | 필요 기능 수 만큼 API를 호출하여 조립             | 모듈 조립을 통해 한 번의 호출로 여러 기능을 동시에 실행  |
+| **모델**             | 고정된 클라우드 모델 사용, 주어진 선택지에서 선택   | 다양한 모델을 직접 소유할 수 있고 경량화하거나 개조할 수 있음   |
 | **하드웨어**         | 높은 수준의 하드웨어 필요. (개인PC 불가)       | 수준에 맞는 하드웨어로 구동 가능. (개인PC 가능)   |
+
+## Get Started
+
+- [설치 가이드](docs/installation_guide.md)
 
 ## 주요 서비스 화면
 
@@ -101,67 +94,9 @@ Closed AI가 높은 편의성
 
 ![ai_florence](docs_image/ai_florence.png)
 
-## 프로젝트 환경
+## 사용 AI 기술
 
-- Python 3.9.6
-  - 가장 복잡한 설정이 필요한 llama-cpp-python을 wheel로 설치하기 때문에 requirements.txt는 추천되지 않습니다.
-- Cuda 11.6
-
-``` bash
-py -3.9 -m venv venv
-
-# 일반 library
-pip install pyinstaller
-pip install googletrans==4.0.0-rc1
-pip install tkinterdnd2 # tkinter 보조로 drag and drop 등의 외부 입력 받음
-pip install pyaudio
-pip install keyboard
-pip install pygame
-pip install Unidecode
-pip install Flask
-pip install screeninfo
-
-# websearch 관련
-pip install sentence-transformers
-pip install beautifulsoup4
-pip install optimum
-pip install duckduckgo_search==6.1.0
-pip install lxml
-pip install faiss-cpu==1.8.0
-pip install rank_bm25==0.2.2
-
-# AI 관련 library
-## 기본
-pip install langchain
-pip install langchain-community
-pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
-pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu121 --upgrade --force-reinstall --no-cache-dir
-pip install pynvml  # GPU 
-pip install transformers==4.41.0
-## 음성인식
-pip install sounddevice
-pip install faster-whisper
-pip install SpeechRecognition  # init에 faster-whisper을 위한 함수 개조 있음
-## 음성합성(VITS)
-pip install jamo g2pk2 
-pip install ko-pron
-pip install Cython
-pip install scipy==1.12.0
-pip install librosa
-# pip install pyopenjtalk==0.2.0 # 일본어음성합성시 필요
-## 화상인식
-pip install einops timm  # florence
-
-## 버전정합성(conflict)
-pip install numpy==1.22.4
-pip install httpx==0.13.3
-
-### Legacy (Not using)
-pip install llama-cpp-python --prefer-binary --extra-index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/AVX2/cu116
-
-```
-
-- 사용 AI 기술
+- MY-Little-JARVIS는 아래와 같은 AI 기술을 사용했습니다.
   - AI 대답 생성 및 의도 파악, 번역, 서버 등 주요 AI 모듈
     - 사용 주 기술 : LLama.cpp, langchain, transformers
     - 사용 모델 : Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf
@@ -183,25 +118,13 @@ pip install llama-cpp-python --prefer-binary --extra-index-url=https://jllllll.g
   - AI 화상 인식
     - 사용 기술 : Florence2
     - 사용 모델 : Microsoft-Florence-2-base
-- 외부 파일
+- 외부 AI 모델
   - kss_korean_ISTFT.pth
   - Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf
   - Microsoft-Florence
   - Sentence Transformers-all-MiniLM-L6-v2
   - Faster-whisper(small)
   - sillero_vad.onnx
-
-## 배포
-
-- 패키징
-
-``` bash
-pyinstaller --onedir main.py -n jarvis --noconsole --contents-directory=files --noconfirm --icon=./assets/ico/icon_arona.ico
-pyinstaller --onedir server_interface.py -n jarvis_server --noconsole --contents-directory=files_server --noconfirm --icon=./assets/ico/icon_arona.ico
-pyinstaller --onedir server_interface_jp.py -n jarvis_server_jp --contents-directory=files_server --noconfirm --icon=./assets/ico/icon_arona.ico --noconsole 
-```
-
-- 정식 다운로드 링크 : [https://huggingface.co/mingu4969/my-little-jarvis-dist/resolve/main/Install.exe]
 
 ## Special Thanks
 
