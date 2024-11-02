@@ -65,6 +65,7 @@ Closed AI가 높은 편의성과 성능을 가지고 그에 맞는 환경과 비
 ## Get Started
 
 - [설치 가이드](docs/installation_guide.md)
+- [사용 가이드](docs/how_to_use_guide.md)
 
 ## 주요 서비스 화면
 
