@@ -108,4 +108,4 @@ MY-Little-JARVIS는 exe 형태의 Product 상태로 배포되어 바로 사용�
     pyinstaller --onedir server_interface_jp.py -n jarvis_server_jp --contents-directory=files_server --noconfirm --icon=./assets/ico/icon_arona.ico --noconsole # 서버 프로그램2ㄴ
     ```
 
-## NEXT STEP : [사용 가이드](docs/how_to_use_guide.md)
+## NEXT STEP : [사용 가이드](../docs/how_to_use_guide.md)
