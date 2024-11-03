@@ -57,6 +57,8 @@ def get_g_language_init():
                         g_language_init = 'ko'
                     elif settings['setting_language'] == '日本語':
                         g_language_init = 'ja'
+                    elif settings['setting_language'] == 'English':
+                        g_language_init = 'en'
         except:
             pass
     return g_language_init
