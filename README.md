@@ -64,6 +64,7 @@ Closed AI가 높은 편의성과 성능을 가지고 그에 맞는 환경과 비
 
 ## Get Started
 
+- [프로젝트 환경](docs/project_status.md)
 - [설치 가이드](docs/installation_guide.md)
 - [사용 가이드](docs/how_to_use_guide.md)
 
@@ -94,6 +95,18 @@ Closed AI가 높은 편의성과 성능을 가지고 그에 맞는 환경과 비
 - 입력된 이미지나 설정된 배경에 관한 대화 기능
 
 ![ai_florence](docs_image/ai_florence.png)
+
+### 티키타카(고속-음성인식대화)
+
+- 실시간 음성 인식을 통한 질문 및 답변
+
+![tikitaka](docs_image/tikitaka.png)
+
+### 대화 이력 관리
+
+- 대화 저장/변경/수정/삭제 및 요약을 통한 제목 추천 기능
+
+![history](docs_image/history.png)
 
 ## 사용 AI 기술
 
