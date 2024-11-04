@@ -8,7 +8,7 @@
 
 ## Language
 
-한국어|[日本語](./docs/README_jp.md)|English
+**한국어**|[日本語](./docs/README_jp.md)|[English](./docs/README_en.md)
 
 ## 개요
 

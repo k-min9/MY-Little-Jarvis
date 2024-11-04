@@ -8,7 +8,7 @@
 
 ## Language
 
-[한국어](../README.md)|日本語|English
+[한국어](../README.md)|**日本語**|[English](../docs/README_en.md)
 
 ## 概要
 
@@ -115,7 +115,7 @@ Closed AIが高い利便性と性能を持ち、それに見合った環境と�
 
 ![history](../docs_image/history.png)
 
-## 사용 AI 기술
+## 使用AI技術
 
 - MY-Little-JARVISは以下のAI技術を使用しました。
   - AI回答生成及び意図把握、翻訳、サーバーなど主要AIモジュール
