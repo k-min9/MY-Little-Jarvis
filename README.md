@@ -6,6 +6,10 @@
 
 [빠른 설치 가이드](docs/installation_guide.md)
 
+## Language
+
+한국어|[日本語](./docs/README_jp.md)|English
+
 ## 개요
 
 - 나만을 위한 그냥 좀 많이 똑똑한 시스템(Just A Rather Very Intelligent System)
@@ -89,7 +93,7 @@ Closed AI가 높은 편의성과 성능을 가지고 그에 맞는 환경과 비
 
 ### Web검색
 
-- 입력된 이미지나 설정된 배경에 관한 대화 기능
+- Web검색결과를 반영한 답변 기능
 
 ![ai_web](docs_image/ai_web.png)
 
